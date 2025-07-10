@@ -185,3 +185,39 @@ async function freeUpDates(checkIn, checkOut) {
     });
   }
 }
+
+exports.updateAvailabilityRange = async (req, res) => {
+  try {
+    const { startDate, endDate, status, notes } = req.body;
+    
+    if (!startDate || !endDate || !status) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Fechas de inicio, fin y estado son requeridos' 
+      });
+    }
+    
+    const start = moment(startDate).startOf('day').toDate();
+    const end = moment(endDate).endOf('day').toDate();
+    
+    if (end <= start) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'La fecha de fin debe ser posterior a la fecha de inicio' 
+      });
+    }
+    
+    await Availability.updateAvailabilityByDateRange(start, end, status, notes);
+    
+    res.json({ 
+      success: true, 
+      message: `Disponibilidad actualizada para el rango de fechas seleccionado` 
+    });
+  } catch (error) {
+    console.error('Error updating availability range:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error al actualizar la disponibilidad por rango de fechas' 
+    });
+  }
+};

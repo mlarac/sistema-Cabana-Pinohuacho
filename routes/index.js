@@ -4,6 +4,7 @@ const homeController = require('../controllers/homeController');
 const reservationController = require('../controllers/reservationController');
 const adminController = require('../controllers/adminController');
 const authController = require('../controllers/authController');
+const priceController = require('../controllers/priceController');
 
 // Middleware for admin authentication
 const requireAdmin = (req, res, next) => {
@@ -31,5 +32,13 @@ router.get('/admin/reservas', requireAdmin, adminController.reservations);
 router.post('/admin/reservas/:id/cancel', requireAdmin, adminController.cancelReservation);
 router.get('/admin/calendario', requireAdmin, adminController.calendar);
 router.post('/admin/availability', requireAdmin, adminController.updateAvailability);
+router.post('/admin/availability-range', requireAdmin, adminController.updateAvailabilityRange); // Nueva ruta
+
+//precios 
+router.get('/admin/precios', requireAdmin, priceController.showPricesPage);
+router.post('/admin/precios/update-category', requireAdmin, priceController.updatePricesByCategory);
+router.post('/admin/precios/update-range', requireAdmin, priceController.updatePricesByRange);
+router.post('/admin/precios/update-single', requireAdmin, priceController.updateSinglePrice);
+
 
 module.exports = router;
