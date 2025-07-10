@@ -1,0 +1,443 @@
+extends layout
+
+block content
+  section.py-5.mt-5
+    .container
+      .row.justify-content-center
+        .col-lg-8
+          .card.shadow-lg
+            .card-header.text-white.text-center.py-4
+              h2.mb-0 
+                | 🏠 Reservar Cabaña Pino Huacho
+              p.mb-0.mt-2 Completa el formulario para confirmar tu reserva
+
+            .card-body.p-5
+              if errors && errors.length > 0
+                .alert.alert-danger
+                  | ⚠️ Por favor corrige los siguientes errores:
+                  ul.mb-0.mt-2
+                    each error in errors
+                      li= error.msg
+
+              //- Progress Steps
+              .progress-steps.mb-4
+                .d-flex.justify-content-between.align-items-center
+                  .step.active
+                    .step-number 1
+                    .step-label Fechas
+                  .step-line
+                  .step
+                    .step-number 2
+                    .step-label Datos
+                  .step-line
+                  .step
+                    .step-number 3
+                    .step-label Confirmación
+
+              form#bookingForm(method='POST', action='/reservar')
+                //- Step 1: Dates
+                .booking-step.active#step-1
+                  h4.mb-4 
+                    | 📅 Paso 1: Selecciona tus fechas
+                  
+                  .row
+                    .col-md-6.mb-3
+                      label.form-label(for='checkIn') 
+                        | 📅 Fecha de Entrada *
+                      input.form-control(type='date', id='checkIn', name='checkIn', 
+                        value=formData ? formData.checkIn : '', required, 
+                        min=new Date().toISOString().split('T')[0])
+                    
+                    .col-md-6.mb-3
+                      label.form-label(for='checkOut') 
+                        | 📅 Fecha de Salida *
+                      input.form-control(type='date', id='checkOut', name='checkOut', 
+                        value=formData ? formData.checkOut : '', required)
+
+                  .mb-3
+                    label.form-label(for='guests') 
+                      | 👥 Número de Huéspedes *
+                    select.form-control(id='guests', name='guests', required)
+                      option(value='', selected=!formData || !formData.guests) Seleccionar...
+                      - for (let i = 1; i <= 6; i++)
+                        option(value=i, selected=formData && formData.guests == i)= i + (i === 1 ? ' persona' : ' personas')
+
+                  //- Calendar Preview
+                  .mb-4
+                    h5 📊 Disponibilidad
+                    .calendar-container
+                      #calendar-preview.border.rounded.p-3.bg-light
+                        p.text-center.text-muted Selecciona las fechas para ver la disponibilidad
+
+                  .text-center
+                    button.btn.btn-primary.btn-lg(type='button', onclick='nextStep()')
+                      | Continuar 
+                      | →
+
+                //- Step 2: Guest Information
+                .booking-step#step-2(style='display: none;')
+                  h4.mb-4 
+                    | 👤 Paso 2: Información del huésped
+                  
+                  .row
+                    .col-md-6.mb-3
+                      label.form-label(for='guestName') 
+                        | 👤 Nombre Completo *
+                      input.form-control(type='text', id='guestName', name='guestName', 
+                        value=formData ? formData.guestName : '', required)
+                    
+                    .col-md-6.mb-3
+                      label.form-label(for='guestEmail') 
+                        | ✉️ Email *
+                      input.form-control(type='email', id='guestEmail', name='guestEmail', 
+                        value=formData ? formData.guestEmail : '', required)
+                  
+                  .row
+                    .col-md-6.mb-3
+                      label.form-label(for='guestPhone') 
+                        | 📞 Teléfono *
+                      input.form-control(type='tel', id='guestPhone', name='guestPhone', 
+                        value=formData ? formData.guestPhone : '', required, 
+                        placeholder='+56 9 1234 5678')
+
+                  .mb-4
+                    label.form-label(for='notes') 
+                      | 📝 Notas Adicionales
+                    textarea.form-control(id='notes', name='notes', rows='3', 
+                      placeholder='Comentarios especiales, solicitudes, etc.')= formData ? formData.notes : ''
+
+                  .d-flex.justify-content-between
+                    button.btn.btn-outline-primary(type='button', onclick='prevStep()')
+                      | ← Volver
+                    button.btn.btn-primary.btn-lg(type='button', onclick='nextStep()')
+                      | Continuar 
+                      | →
+
+                //- Step 3: Confirmation
+                .booking-step#step-3(style='display: none;')
+                  h4.mb-4 
+                    | ✅ Paso 3: Confirma tu reserva
+                  
+                  .pricing-info.p-4.rounded.mb-4
+                    h5.fw-bold.mb-3 
+                      | 💰 Resumen de tu reserva
+                    
+                    .reservation-summary
+                      .d-flex.justify-content-between.mb-2
+                        span 
+                          | 👤 Huésped:
+                        strong#summary-name -
+                      
+                      .d-flex.justify-content-between.mb-2
+                        span 
+                          | ✉️ Email:
+                        strong#summary-email -
+                      
+                      .d-flex.justify-content-between.mb-2
+                        span 
+                          | 📞 Teléfono:
+                        strong#summary-phone -
+                      
+                      .d-flex.justify-content-between.mb-2
+                        span 
+                          | 📅 Entrada:
+                        strong#summary-checkin -
+                      
+                      .d-flex.justify-content-between.mb-2
+                        span 
+                          | 📅 Salida:
+                        strong#summary-checkout -
+                      
+                      .d-flex.justify-content-between.mb-2
+                        span 
+                          | 👥 Huéspedes:
+                        strong#summary-guests -
+                      
+                      .d-flex.justify-content-between.mb-2
+                        span 
+                          | 🌙 Noches:
+                        strong#summary-nights -
+                      
+                      .d-flex.justify-content-between.mb-2
+                        span Precio por noche:
+                        strong $150.000 CLP
+                      
+                      hr
+                      
+                      .d-flex.justify-content-between.fs-5
+                        strong 
+                          | 💰 Total:
+                        strong#summary-total $0 CLP
+
+                  .d-flex.justify-content-between
+                    button.btn.btn-outline-primary(type='button', onclick='prevStep()')
+                      | ← Volver
+                    button.btn.btn-success.btn-lg(type='submit') 
+                      | ✅ Confirmar Reserva
+
+  //- Info Section
+  section.py-5.bg-light
+    .container
+      .row
+        .col-lg-8.mx-auto.text-center
+          h3.fw-bold.mb-4 
+            | 🎯 Proceso Simple en 3 Pasos
+          .row.g-4
+            .col-md-4
+              .step-card.p-4
+                .step-number.d-inline-flex.align-items-center.justify-content-center.mb-3 1
+                h5 
+                  | 📅 Selecciona Fechas
+                p Elige tus fechas de entrada y salida, y el número de huéspedes
+            
+            .col-md-4
+              .step-card.p-4
+                .step-number.d-inline-flex.align-items-center.justify-content-center.mb-3 2
+                h5 
+                  | 👤 Completa Datos
+                p Ingresa tu información de contacto y comentarios especiales
+            
+            .col-md-4
+              .step-card.p-4
+                .step-number.d-inline-flex.align-items-center.justify-content-center.mb-3 3
+                h5 
+                  | ✅ Confirma y Listo
+                p Revisa tu reserva y recibe confirmación por email
+
+block scripts
+  style.
+    .progress-steps {
+      margin-bottom: 2rem;
+    }
+    .step {
+      text-align: center;
+      flex: 1;
+    }
+    .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #e9ecef;
+      color: #6c757d;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    .step.active .step-number {
+      background: var(--primary-color);
+      color: white;
+    }
+    .step-line {
+      height: 2px;
+      background: #e9ecef;
+      flex: 1;
+      margin: 0 1rem;
+      margin-top: 20px;
+    }
+    .step-label {
+      font-size: 0.9rem;
+      color: #6c757d;
+      font-weight: 500;
+    }
+    .step.active .step-label {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    .booking-step {
+      min-height: 400px;
+    }
+
+  script.
+    let currentStep = 1;
+    const totalSteps = 3;
+    const pricePerNight = 150000;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkInInput = document.getElementById('checkIn');
+      const checkOutInput = document.getElementById('checkOut');
+
+      function updatePricing() {
+        const checkIn = new Date(checkInInput.value);
+        const checkOut = new Date(checkOutInput.value);
+
+        if (checkIn && checkOut && checkOut > checkIn) {
+          const timeDiff = checkOut.getTime() - checkIn.getTime();
+          const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+          // Load calendar availability
+          loadCalendarAvailability(checkIn, checkOut);
+        }
+      }
+
+      function loadCalendarAvailability(startDate, endDate) {
+        const year = startDate.getFullYear();
+        const month = startDate.getMonth() + 1;
+
+        fetch(`/api/availability/${year}/${month.toString().padStart(2, '0')}`)
+          .then(response => response.json())
+          .then(data => {
+            displayCalendar(data, startDate, endDate);
+          })
+          .catch(error => {
+            console.error('Error loading availability:', error);
+          });
+      }
+
+      function displayCalendar(availability, selectedStart, selectedEnd) {
+        const calendarContainer = document.getElementById('calendar-preview');
+        
+        let conflictFound = false;
+        const current = new Date(selectedStart);
+        while (current < selectedEnd) {
+          const dateStr = current.toISOString().split('T')[0];
+          if (availability[dateStr] === 'occupied' || availability[dateStr] === 'maintenance') {
+            conflictFound = true;
+            break;
+          }
+          current.setDate(current.getDate() + 1);
+        }
+
+        let html = '';
+        if (conflictFound) {
+          html = '<div class="alert alert-danger">⚠️ Algunas fechas seleccionadas no están disponibles</div>';
+        } else if (selectedStart && selectedEnd) {
+          html = '<div class="alert alert-success">✅ Las fechas seleccionadas están disponibles</div>';
+        } else {
+          html = '<p class="text-center text-muted">Selecciona las fechas para ver la disponibilidad</p>';
+        }
+
+        calendarContainer.innerHTML = html;
+      }
+
+      checkInInput.addEventListener('change', function() {
+        const checkInDate = new Date(this.value);
+        checkInDate.setDate(checkInDate.getDate() + 1);
+        checkOutInput.min = checkInDate.toISOString().split('T')[0];
+        updatePricing();
+      });
+
+      checkOutInput.addEventListener('change', updatePricing);
+
+      // Form validation
+      document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        const checkIn = new Date(checkInInput.value);
+        const checkOut = new Date(checkOutInput.value);
+        
+        if (checkOut <= checkIn) {
+          e.preventDefault();
+          showAlert('danger', '⚠️ La fecha de salida debe ser posterior a la fecha de entrada');
+        }
+      });
+    });
+
+    function nextStep() {
+      if (currentStep < totalSteps) {
+        // Validate current step
+        if (!validateStep(currentStep)) {
+          return;
+        }
+
+        // Hide current step
+        document.getElementById(`step-${currentStep}`).style.display = 'none';
+        document.querySelector(`.step:nth-child(${currentStep * 2 - 1})`).classList.remove('active');
+
+        // Show next step
+        currentStep++;
+        document.getElementById(`step-${currentStep}`).style.display = 'block';
+        document.querySelector(`.step:nth-child(${currentStep * 2 - 1})`).classList.add('active');
+
+        // Update summary if on step 3
+        if (currentStep === 3) {
+          updateSummary();
+        }
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 1) {
+        // Hide current step
+        document.getElementById(`step-${currentStep}`).style.display = 'none';
+        document.querySelector(`.step:nth-child(${currentStep * 2 - 1})`).classList.remove('active');
+
+        // Show previous step
+        currentStep--;
+        document.getElementById(`step-${currentStep}`).style.display = 'block';
+        document.querySelector(`.step:nth-child(${currentStep * 2 - 1})`).classList.add('active');
+      }
+    }
+
+    function validateStep(step) {
+      switch(step) {
+        case 1:
+          const checkIn = document.getElementById('checkIn').value;
+          const checkOut = document.getElementById('checkOut').value;
+          const guests = document.getElementById('guests').value;
+          
+          if (!checkIn || !checkOut || !guests) {
+            showAlert('warning', '⚠️ Por favor completa todos los campos de fechas');
+            return false;
+          }
+          
+          if (new Date(checkOut) <= new Date(checkIn)) {
+            showAlert('warning', '⚠️ La fecha de salida debe ser posterior a la fecha de entrada');
+            return false;
+          }
+          break;
+          
+        case 2:
+          const name = document.getElementById('guestName').value;
+          const email = document.getElementById('guestEmail').value;
+          const phone = document.getElementById('guestPhone').value;
+          
+          if (!name || !email || !phone) {
+            showAlert('warning', '⚠️ Por favor completa todos los campos obligatorios');
+            return false;
+          }
+          break;
+      }
+      return true;
+    }
+
+    function updateSummary() {
+      const checkIn = document.getElementById('checkIn').value;
+      const checkOut = document.getElementById('checkOut').value;
+      const guests = document.getElementById('guests').value;
+      const name = document.getElementById('guestName').value;
+      const email = document.getElementById('guestEmail').value;
+      const phone = document.getElementById('guestPhone').value;
+
+      const checkInDate = new Date(checkIn);
+      const checkOutDate = new Date(checkOut);
+      const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 3600 * 24));
+      const total = nights * pricePerNight;
+
+      document.getElementById('summary-name').textContent = name;
+      document.getElementById('summary-email').textContent = email;
+      document.getElementById('summary-phone').textContent = phone;
+      document.getElementById('summary-checkin').textContent = checkInDate.toLocaleDateString('es-CL');
+      document.getElementById('summary-checkout').textContent = checkOutDate.toLocaleDateString('es-CL');
+      document.getElementById('summary-guests').textContent = guests + (guests == 1 ? ' persona' : ' personas');
+      document.getElementById('summary-nights').textContent = nights;
+      document.getElementById('summary-total').textContent = new Intl.NumberFormat('es-CL', {
+        style: 'currency',
+        currency: 'CLP'
+      }).format(total);
+    }
+
+    function showAlert(type, message) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      
+      const container = document.querySelector('.card-body');
+      container.insertBefore(alertDiv, container.firstChild);
+      
+      setTimeout(() => {
+        alertDiv.remove();
+      }, 5000);
+    }

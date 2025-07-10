@@ -1,0 +1,326 @@
+extends layout
+
+block content
+  section.py-5.mt-5
+    .container
+      .row
+        .col-12.text-center.mb-5
+          h1.display-4.fw-bold 
+            | 🏠 Características de la Cabaña
+          p.lead Descubre todo lo que nuestra cabaña tiene para ofrecerte en el corazón de la Araucanía
+
+  section.py-5
+    .container
+      .row.g-4
+        each feature in features
+          .col-md-6.col-lg-4
+            .card.h-100.shadow-sm.feature-card
+              .card-body.text-center.p-4
+                .feature-icon.mb-4
+                  case feature.icon
+                    when 'home'
+                      | 🏠
+                    when 'wifi'
+                      | 📶
+                    when 'car'
+                      | 🚗
+                    when 'flame'
+                      | 🔥
+                    when 'utensils'
+                      | 🍽️
+                    when 'tree-pine'
+                      | 🌲
+                    default
+                      | ✨
+                h5.card-title.fw-bold= feature.title
+                p.card-text= feature.description
+
+  //- Detailed Amenities Section
+  section.py-5.bg-light
+    .container
+      .row
+        .col-lg-6
+          h2.display-6.fw-bold.mb-4 
+            | ✨ Comodidades Completas
+          .amenities-list
+            .amenity-item.d-flex.align-items-center.mb-3
+              | ✅
+              span.ms-3 Ropa de cama y toallas incluidas
+            
+            .amenity-item.d-flex.align-items-center.mb-3
+              | ✅
+              span.ms-3 TV con cable y Netflix
+            
+            .amenity-item.d-flex.align-items-center.mb-3
+              | ✅
+              span.ms-3 Parrilla para asados al aire libre
+            
+            .amenity-item.d-flex.align-items-center.mb-3
+              | ✅
+              span.ms-3 Utensilios de cocina completos
+            
+            .amenity-item.d-flex.align-items-center.mb-3
+              | ✅
+              span.ms-3 Lavadora y secadora
+            
+            .amenity-item.d-flex.align-items-center.mb-3
+              | ✅
+              span.ms-3 Terraza con vista panorámica
+        
+        .col-lg-6
+          .cabin-specs.p-4.rounded-3.shadow-sm
+            h4.fw-bold.mb-4 
+              | 📋 Especificaciones Técnicas
+            
+            .spec-row.d-flex.justify-content-between.py-3.border-bottom
+              strong 
+                | 👥 Capacidad máxima:
+              span 6 personas
+            
+            .spec-row.d-flex.justify-content-between.py-3.border-bottom
+              strong 
+                | 🛏️ Habitaciones:
+              span 3 (2 matrimoniales, 1 individual)
+            
+            .spec-row.d-flex.justify-content-between.py-3.border-bottom
+              strong 
+                | 🚿 Baños:
+              span 2 completos
+            
+            .spec-row.d-flex.justify-content-between.py-3.border-bottom
+              strong 
+                | 📐 Superficie:
+              span 120 m²
+            
+            .spec-row.d-flex.justify-content-between.py-3.border-bottom
+              strong 
+                | 🕐 Check-in:
+              span 15:00 hrs
+            
+            .spec-row.d-flex.justify-content-between.py-3
+              strong 
+                | 🕐 Check-out:
+              span 11:00 hrs
+
+  //- Photo Gallery Section
+  section.py-5
+    .container
+      .row
+        .col-12.text-center.mb-5
+          h2.display-6.fw-bold 
+            | 📸 Galería de Fotos
+          p.lead Explora cada rincón de nuestra acogedora cabaña
+
+      .row.g-4
+        .col-md-6.col-lg-4
+          .gallery-item.position-relative.overflow-hidden.rounded-3
+            img.img-fluid.gallery-img(src='https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg', alt='Sala de estar')
+            .gallery-overlay
+              h5 
+                | 🛋️ Sala de Estar
+              p Espacio acogedor con chimenea y vista al bosque
+        
+        .col-md-6.col-lg-4
+          .gallery-item.position-relative.overflow-hidden.rounded-3
+            img.img-fluid.gallery-img(src='https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg', alt='Cocina equipada')
+            .gallery-overlay
+              h5 
+                | 🍽️ Cocina Equipada
+              p Electrodomésticos modernos y utensilios completos
+        
+        .col-md-6.col-lg-4
+          .gallery-item.position-relative.overflow-hidden.rounded-3
+            img.img-fluid.gallery-img(src='https://images.pexels.com/photos/1438832/pexels-photo-1438832.jpeg', alt='Habitación principal')
+            .gallery-overlay
+              h5 
+                | 🛏️ Habitación Principal
+              p Cama matrimonial con ropa de cama premium
+        
+        .col-md-6.col-lg-4
+          .gallery-item.position-relative.overflow-hidden.rounded-3
+            img.img-fluid.gallery-img(src='https://images.pexels.com/photos/1579253/pexels-photo-1579253.jpeg', alt='Vista exterior')
+            .gallery-overlay
+              h5 
+                | 🌲 Vista Exterior
+              p Arquitectura rústica integrada al paisaje
+        
+        .col-md-6.col-lg-4
+          .gallery-item.position-relative.overflow-hidden.rounded-3
+            img.img-fluid.gallery-img(src='https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg', alt='Terraza')
+            .gallery-overlay
+              h5 
+                | 🌅 Terraza
+              p Espacio perfecto para relajarse y disfrutar la naturaleza
+        
+        .col-md-6.col-lg-4
+          .gallery-item.position-relative.overflow-hidden.rounded-3
+            img.img-fluid.gallery-img(src='https://images.pexels.com/photos/1438832/pexels-photo-1438832.jpeg', alt='Área de parrilla')
+            .gallery-overlay
+              h5 
+                | 🔥 Área de Parrilla
+              p Zona de asados con mesa y bancos de madera
+
+  //- Location & Activities Section
+  section.py-5.bg-light
+    .container
+      .row
+        .col-12.text-center.mb-5
+          h2.display-6.fw-bold 
+            | 🗺️ Ubicación y Actividades
+          p.lead Pino Huacho ofrece múltiples atractivos naturales y experiencias únicas
+      
+      .row.g-4
+        .col-md-6.col-lg-3
+          .activity-card.text-center.p-4.h-100
+            | 🥾
+            h5.mt-3.fw-bold Senderismo
+            p.text-muted Rutas de diferentes niveles por bosques nativos con flora y fauna única
+
+        .col-md-6.col-lg-3
+          .activity-card.text-center.p-4.h-100
+            | 📸
+            h5.mt-3.fw-bold Fotografía
+            p.text-muted Paisajes únicos ideales para capturar la belleza de la Araucanía
+        
+        .col-md-6.col-lg-3
+          .activity-card.text-center.p-4.h-100
+            | 🎣
+            h5.mt-3.fw-bold Pesca Deportiva
+            p.text-muted Lagos y ríos cercanos con truchas y especies nativas
+        
+        .col-md-6.col-lg-3
+          .activity-card.text-center.p-4.h-100
+            | 🍃
+            h5.mt-3.fw-bold Observación Natural
+            p.text-muted Flora y fauna nativa, aves endémicas y paisajes volcánicos
+
+  //- Nearby Attractions
+  section.py-5
+    .container
+      .row
+        .col-12.text-center.mb-5
+          h2.display-6.fw-bold 
+            | 🏔️ Atractivos Cercanos
+          p.lead Descubre los tesoros naturales de la región
+
+      .row.g-4
+        .col-md-4
+          .card.h-100.border-0.shadow-sm
+            .card-body.p-4.text-center
+              | 🌋
+              h5.mt-3.fw-bold Volcán Llaima
+              p.text-muted A 45 minutos en auto. Uno de los volcanes más activos de Chile
+              .small.text-muted 📍 45 km - 45 min
+
+        .col-md-4
+          .card.h-100.border-0.shadow-sm
+            .card-body.p-4.text-center
+              | 🏞️
+              h5.mt-3.fw-bold Parque Nacional Conguillío
+              p.text-muted Bosques de araucarias milenarias y paisajes únicos
+              .small.text-muted 📍 60 km - 1 hora
+
+        .col-md-4
+          .card.h-100.border-0.shadow-sm
+            .card-body.p-4.text-center
+              | 🏔️
+              h5.mt-3.fw-bold Termas de Manzanar
+              p.text-muted Aguas termales naturales para relajación total
+              .small.text-muted 📍 35 km - 30 min
+
+  //- Pricing Section
+  section.py-5.bg-light
+    .container
+      .row
+        .col-lg-8.mx-auto.text-center
+          h2.display-6.fw-bold.mb-4 
+            | 💰 Tarifas y Condiciones
+          
+          .pricing-info.p-4.rounded.mb-4
+            .row.g-4
+              .col-md-6
+                .d-flex.justify-content-between.align-items-center.py-2
+                  strong 
+                    | 🌙 Precio por noche:
+                  .fs-4.fw-bold.text-primary $150.000 CLP
+              
+              .col-md-6
+                .d-flex.justify-content-between.align-items-center.py-2
+                  strong 
+                    | 👥 Huésped adicional:
+                  .fs-5 Incluido hasta 6 personas
+
+            hr.my-3
+
+            .row.g-3.text-start
+              .col-md-6
+                h6.fw-bold 
+                  | ✅ Incluido:
+                ul.list-unstyled.small
+                  li • Ropa de cama y toallas
+                  li • Wi-Fi gratuito
+                  li • Estacionamiento
+                  li • Uso de parrilla
+                  li • Calefacción a leña
+              
+              .col-md-6
+                h6.fw-bold 
+                  | ℹ️ Políticas:
+                ul.list-unstyled.small
+                  li • Check-in: 15:00 hrs
+                  li • Check-out: 11:00 hrs
+                  li • No se permiten mascotas
+                  li • No fumar en interiores
+                  li • Máximo 6 personas
+
+  //- CTA Section
+  section.py-5.bg-primary.text-white
+    .container.text-center
+      h2.display-6.fw-bold.mb-4 
+        | 🌟 ¿Te Gusta lo que Ves?
+      p.lead.mb-4 Reserva ahora y vive una experiencia inolvidable en nuestra cabaña rodeada de naturaleza
+      .d-flex.justify-content-center.gap-3.flex-wrap
+        a.btn.btn-warning.btn-lg(href='/reservar') 
+          | 📅 Reservar Ahora
+        a.btn.btn-outline-light.btn-lg(href='/') 
+          | 🏠 Volver al Inicio
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add scroll animations
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, observerOptions);
+
+      // Observe all cards and gallery items
+      document.querySelectorAll('.feature-card, .gallery-item, .activity-card, .card').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+      });
+
+      // Add hover effects to spec rows
+      document.querySelectorAll('.spec-row').forEach(row => {
+        row.addEventListener('mouseenter', function() {
+          this.style.backgroundColor = 'rgba(45, 80, 22, 0.05)';
+          this.style.paddingLeft = '1rem';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+          this.style.backgroundColor = '';
+          this.style.paddingLeft = '';
+        });
+      });
+    });

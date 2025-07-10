@@ -1,0 +1,693 @@
+extends layout
+
+block content
+  //- Hero Section
+  section.hero-section
+    .hero-overlay
+    .container.h-100
+      .row.h-100.align-items-center
+        .col-lg-8
+          .hero-content.text-white
+            h1.display-4.fw-bold.mb-4 
+              | 🌲 Descanso Natural en el Corazón de la Araucanía
+            p.lead.mb-4 Escapa de la rutina y conecta con la naturaleza en nuestra acogedora cabaña ubicada en Pino Huacho. Un refugio perfecto para relajarse y disfrutar de paisajes únicos rodeados de bosques nativos y lagos cristalinos.
+            .hero-buttons
+              a.btn.btn-warning.btn-lg.me-3(href='/reservar') 
+                | 📅 Reservar Ahora
+              a.btn.btn-outline-light.btn-lg(href='/caracteristicas') 
+                | 🏠 Ver Características
+
+  //- Quick Info Section
+  section.py-5.bg-light
+    .container
+      .row.text-center.g-4
+        .col-md-3
+          .feature-card.p-4.h-100
+            .feature-icon.mb-3
+              | 👥
+            h5.fw-bold Hasta 6 personas
+            p.text-muted Espaciosa y cómoda para grupos familiares y amigos
+        
+        .col-md-3
+          .feature-card.p-4.h-100
+            .feature-icon.mb-3
+              | 🛏️
+            h5.fw-bold 3 Habitaciones
+            p.text-muted Dormitorios acogedores con ropa de cama incluida
+        
+        .col-md-3
+          .feature-card.p-4.h-100
+            .feature-icon.mb-3
+              | 🔥
+            h5.fw-bold Calefacción a leña
+            p.text-muted Ambiente cálido y acogedor durante todo el año
+        
+        .col-md-3
+          .feature-card.p-4.h-100
+            .feature-icon.mb-3
+              | 🌲
+            h5.fw-bold Entorno natural
+            p.text-muted Rodeada de bosques nativos y senderos para explorar
+
+  //- Availability Calendar Section
+  section.py-5
+    .container
+      .row
+        .col-12.text-center.mb-5
+          h2.display-5.fw-bold 
+            | 📅 Disponibilidad en Tiempo Real
+          p.lead Consulta las fechas disponibles y planifica tu estadía perfecta
+
+      .row.justify-content-center
+        .col-lg-10
+          .card.shadow-lg.border-0
+            .card-header.text-white.text-center.py-4
+              .d-flex.justify-content-between.align-items-center
+                button.btn.btn-outline-light(onclick='changeMonth(-1)')
+                  | ← Anterior
+                h4.mb-0#calendar-title
+                  | 📅 Cargando...
+                button.btn.btn-outline-light(onclick='changeMonth(1)')
+                  | Siguiente →
+
+            .card-body.p-4
+              //- Calendar Legend
+              .row.mb-4
+                .col-12
+                  .d-flex.justify-content-center.flex-wrap.gap-4
+                    .legend-item.d-flex.align-items-center
+                      .legend-color.available.me-2
+                      span 🟢 Disponible
+                    .legend-item.d-flex.align-items-center
+                      .legend-color.occupied.me-2
+                      span 🔴 Ocupado
+                    .legend-item.d-flex.align-items-center
+                      .legend-color.maintenance.me-2
+                      span 🟡 Mantenimiento
+                    .legend-item.d-flex.align-items-center
+                      .legend-color.selected.me-2
+                      span 🔵 Seleccionado
+
+              //- Calendar Container
+              #availability-calendar.calendar-grid
+                .text-center.py-5
+                  .spinner-border.text-primary(role='status')
+                    span.visually-hidden Cargando calendario...
+
+              //- Selected Dates Info
+              #selected-dates-info.mt-4(style='display: none;')
+                .alert.alert-info
+                  h6.fw-bold.mb-2 
+                    | 📋 Fechas Seleccionadas
+                  .row
+                    .col-md-4
+                      strong 📅 Entrada: 
+                      span#selected-checkin -
+                    .col-md-4
+                      strong 📅 Salida: 
+                      span#selected-checkout -
+                    .col-md-4
+                      strong 🌙 Noches: 
+                      span#selected-nights -
+                  .mt-3
+                    strong 💰 Precio estimado: 
+                    span#estimated-price $0 CLP
+                  .mt-3.text-center
+                    a.btn.btn-success.btn-lg(href='/reservar', id='reserve-btn')
+                      | ✅ Reservar estas fechas
+
+  //- Gallery Preview Section
+  section.py-5.bg-light
+    .container
+      .row
+        .col-12.text-center.mb-5
+          h2.display-5.fw-bold 
+            | 🏞️ Un Lugar Único para Descansar
+          p.lead Descubre la belleza natural de la Araucanía desde nuestra cabaña
+      
+      .row.g-4
+        .col-md-6
+          .gallery-item.position-relative.overflow-hidden.rounded-3
+            img.img-fluid.gallery-img(src='https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg', alt='Interior acogedor de la cabaña')
+            .gallery-overlay
+              h5 
+                | 🏠 Interior Acogedor
+              p Espacios cálidos y confortables con decoración rústica
+        
+        .col-md-6
+          .gallery-item.position-relative.overflow-hidden.rounded-3
+            img.img-fluid.gallery-img(src='https://images.pexels.com/photos/1438832/pexels-photo-1438832.jpeg', alt='Vista exterior de la cabaña')
+            .gallery-overlay
+              h5 
+                | 🌲 Arquitectura Natural
+              p Perfecta integración con el entorno boscoso
+        
+        .col-md-6
+          .gallery-item.position-relative.overflow-hidden.rounded-3
+            img.img-fluid.gallery-img(src='https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg', alt='Cocina equipada')
+            .gallery-overlay
+              h5 
+                | 🍽️ Cocina Completamente Equipada
+              p Todo lo necesario para preparar deliciosas comidas
+        
+        .col-md-6
+          .gallery-item.position-relative.overflow-hidden.rounded-3
+            img.img-fluid.gallery-img(src='https://images.pexels.com/photos/1579253/pexels-photo-1579253.jpeg', alt='Paisaje natural circundante')
+            .gallery-overlay
+              h5 
+                | 🏔️ Paisajes Únicos
+              p Naturaleza virgen y vistas panorámicas a tu alrededor
+
+  //- Features Highlight
+  section.py-5
+    .container
+      .row
+        .col-12.text-center.mb-5
+          h2.display-6.fw-bold 
+            | ✨ Comodidades Premium
+          p.lead Todo lo que necesitas para una estadía perfecta
+
+      .row.g-4
+        .col-md-4
+          .feature-card.text-center.p-4.h-100
+            .feature-icon.mb-3
+              | 📶
+            h5.fw-bold Wi-Fi Gratuito
+            p.text-muted Internet de alta velocidad para mantenerte conectado
+        
+        .col-md-4
+          .feature-card.text-center.p-4.h-100
+            .feature-icon.mb-3
+              | 🚗
+            h5.fw-bold Estacionamiento
+            p.text-muted Espacio privado y seguro para tu vehículo
+        
+        .col-md-4
+          .feature-card.text-center.p-4.h-100
+            .feature-icon.mb-3
+              | 🔥
+            h5.fw-bold Parrilla
+            p.text-muted Disfruta de asados al aire libre con vista al bosque
+
+  //- Activities Section
+  section.py-5.bg-light
+    .container
+      .row
+        .col-12.text-center.mb-5
+          h2.display-6.fw-bold 
+            | 🎯 Actividades y Experiencias
+          p.lead Descubre todo lo que puedes hacer en Pino Huacho
+
+      .row.g-4
+        .col-md-6.col-lg-3
+          .activity-card.text-center.p-4.h-100
+            | 🥾
+            h5.mt-3.fw-bold Senderismo
+            p.text-muted Rutas de diferentes niveles por bosques nativos
+
+        .col-md-6.col-lg-3
+          .activity-card.text-center.p-4.h-100
+            | 📸
+            h5.mt-3.fw-bold Fotografía
+            p.text-muted Paisajes únicos ideales para capturar momentos
+
+        .col-md-6.col-lg-3
+          .activity-card.text-center.p-4.h-100
+            | 🎣
+            h5.mt-3.fw-bold Pesca
+            p.text-muted Lagos y ríos cercanos para la pesca deportiva
+
+        .col-md-6.col-lg-3
+          .activity-card.text-center.p-4.h-100
+            | 🍃
+            h5.mt-3.fw-bold Observación
+            p.text-muted Flora y fauna nativa de la Araucanía
+
+  //- Testimonials Section
+  section.py-5
+    .container
+      .row
+        .col-12.text-center.mb-5
+          h2.display-6.fw-bold 
+            | 💬 Lo que dicen nuestros huéspedes
+          p.lead Experiencias reales de quienes nos han visitado
+
+      .row.g-4
+        .col-md-4
+          .card.h-100.border-0.shadow-sm
+            .card-body.p-4.text-center
+              | ⭐⭐⭐⭐⭐
+              p.mt-3.mb-3 "Una experiencia increíble. La cabaña es exactamente como se ve en las fotos, muy acogedora y con todas las comodidades."
+              strong - María González
+
+        .col-md-4
+          .card.h-100.border-0.shadow-sm
+            .card-body.p-4.text-center
+              | ⭐⭐⭐⭐⭐
+              p.mt-3.mb-3 "El lugar perfecto para desconectarse. Los paisajes son espectaculares y la atención es excelente."
+              strong - Carlos Mendoza
+
+        .col-md-4
+          .card.h-100.border-0.shadow-sm
+            .card-body.p-4.text-center
+              | ⭐⭐⭐⭐⭐
+              p.mt-3.mb-3 "Ideal para ir en familia. Los niños disfrutaron mucho y nosotros pudimos relajarnos completamente."
+              strong - Ana Rodríguez
+
+  //- CTA Section
+  section.py-5.bg-primary.text-white
+    .container.text-center
+      .row
+        .col-lg-8.mx-auto
+          h2.display-5.fw-bold.mb-4 
+            | 🌟 ¿Listo para una Experiencia Única?
+          p.lead.mb-4 Reserva ahora y asegura tu lugar en este paraíso natural. Disponibilidad limitada durante temporada alta.
+          .d-flex.justify-content-center.gap-3.flex-wrap
+            a.btn.btn-warning.btn-lg(href='/reservar') 
+              | 📅 Hacer Reserva
+            a.btn.btn-outline-light.btn-lg(href='/caracteristicas') 
+              | 📋 Ver Detalles
+
+block scripts
+  style.
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+      background-color: #e9ecef;
+      border-radius: 12px;
+      overflow: hidden;
+      padding: 2px;
+    }
+    
+    .calendar-header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      color: white;
+      padding: 1rem;
+      font-weight: 600;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    
+    .calendar-day {
+      background: white;
+      padding: 1rem 0.5rem;
+      min-height: 60px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      position: relative;
+      border-radius: 8px;
+    }
+    
+    .calendar-day:hover {
+      transform: scale(1.05);
+      z-index: 2;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .calendar-day.available {
+      background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+      color: #2d5016;
+      border: 2px solid #66bb6a;
+    }
+    
+    .calendar-day.occupied {
+      background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+      color: #c62828;
+      border: 2px solid #f44336;
+      cursor: not-allowed;
+    }
+    
+    .calendar-day.maintenance {
+      background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+      color: #f57c00;
+      border: 2px solid #ffc107;
+      cursor: not-allowed;
+    }
+    
+    .calendar-day.selected {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      color: #1565c0;
+      border: 3px solid #2196f3;
+      transform: scale(1.1);
+      z-index: 3;
+    }
+    
+    .calendar-day.other-month {
+      opacity: 0.3;
+      background: #f8f9fa;
+      color: #6c757d;
+    }
+    
+    .calendar-day.today {
+      font-weight: 700;
+      position: relative;
+    }
+    
+    .calendar-day.today::after {
+      content: '•';
+      position: absolute;
+      bottom: 4px;
+      color: #2196f3;
+      font-size: 1.2rem;
+    }
+    
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    
+    .legend-color.available {
+      background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+      border: 2px solid #66bb6a;
+    }
+    
+    .legend-color.occupied {
+      background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+      border: 2px solid #f44336;
+    }
+    
+    .legend-color.maintenance {
+      background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+      border: 2px solid #ffc107;
+    }
+    
+    .legend-color.selected {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      border: 2px solid #2196f3;
+    }
+    
+    .legend-item {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    
+    @media (max-width: 768px) {
+      .calendar-day {
+        min-height: 50px;
+        padding: 0.5rem 0.25rem;
+        font-size: 0.85rem;
+      }
+      
+      .calendar-header {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.8rem;
+      }
+    }
+
+  script.
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+    let availabilityData = {};
+    let selectedDates = [];
+    const pricePerNight = 150000;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      loadCalendar();
+      
+      // Add scroll animations
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, observerOptions);
+
+      // Observe all feature cards and gallery items
+      document.querySelectorAll('.feature-card, .gallery-item, .activity-card').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+      });
+    });
+
+    function loadCalendar() {
+      const monthNames = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+      ];
+      
+      document.getElementById('calendar-title').textContent = 
+        `📅 ${monthNames[currentMonth]} ${currentYear}`;
+
+      fetch(`/api/availability/${currentYear}/${(currentMonth + 1).toString().padStart(2, '0')}`)
+        .then(response => response.json())
+        .then(data => {
+          availabilityData = data;
+          renderCalendar();
+        })
+        .catch(error => {
+          console.error('Error loading calendar:', error);
+          showCalendarError();
+        });
+    }
+
+    function renderCalendar() {
+      const container = document.getElementById('availability-calendar');
+      const firstDay = new Date(currentYear, currentMonth, 1);
+      const lastDay = new Date(currentYear, currentMonth + 1, 0);
+      const startDate = new Date(firstDay);
+      startDate.setDate(startDate.getDate() - firstDay.getDay());
+      const today = new Date();
+
+      let html = '';
+      
+      // Headers
+      const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+      dayNames.forEach(day => {
+        html += `<div class="calendar-header">${day}</div>`;
+      });
+
+      // Calendar days
+      const current = new Date(startDate);
+      for (let week = 0; week < 6; week++) {
+        let hasCurrentMonth = false;
+        for (let day = 0; day < 7; day++) {
+          const dateStr = current.toISOString().split('T')[0];
+          const isCurrentMonth = current.getMonth() === currentMonth;
+          const isToday = current.toDateString() === today.toDateString();
+          const isPast = current < today;
+          const status = availabilityData[dateStr] || 'available';
+          
+          if (isCurrentMonth) hasCurrentMonth = true;
+
+          let classes = ['calendar-day'];
+          if (!isCurrentMonth) classes.push('other-month');
+          if (isToday) classes.push('today');
+          if (isPast && isCurrentMonth) classes.push('past');
+          
+          // Only add status classes for current month and future dates
+          if (isCurrentMonth && !isPast) {
+            classes.push(status);
+          } else if (isPast) {
+            classes.push('past');
+          }
+
+          const clickable = isCurrentMonth && !isPast && (status === 'available');
+          const onclick = clickable ? `onclick="selectDate('${dateStr}')"` : '';
+
+          html += `<div class="${classes.join(' ')}" 
+                        data-date="${dateStr}" 
+                        ${onclick}
+                        title="${getDateTooltip(current, status, isPast)}">
+                     <span class="date-number">${current.getDate()}</span>
+                     ${getDateIcon(status, isPast)}
+                   </div>`;
+          
+          current.setDate(current.getDate() + 1);
+        }
+        if (!hasCurrentMonth && week > 3) break;
+      }
+
+      container.innerHTML = html;
+    }
+
+    function getDateIcon(status, isPast) {
+      if (isPast) return '<small>⏰</small>';
+      
+      switch(status) {
+        case 'available': return '<small>✅</small>';
+        case 'occupied': return '<small>❌</small>';
+        case 'maintenance': return '<small>🔧</small>';
+        default: return '<small>✅</small>';
+      }
+    }
+
+    function getDateTooltip(date, status, isPast) {
+      const dateStr = date.toLocaleDateString('es-CL');
+      
+      if (isPast) return `${dateStr} - Fecha pasada`;
+      
+      switch(status) {
+        case 'available': return `${dateStr} - Disponible para reserva`;
+        case 'occupied': return `${dateStr} - Ocupado`;
+        case 'maintenance': return `${dateStr} - En mantenimiento`;
+        default: return `${dateStr} - Disponible para reserva`;
+      }
+    }
+
+    function selectDate(dateStr) {
+      const clickedDate = new Date(dateStr);
+      
+      // Clear previous selections if starting new selection
+      if (selectedDates.length === 2) {
+        selectedDates = [];
+        document.querySelectorAll('.calendar-day.selected').forEach(el => {
+          el.classList.remove('selected');
+        });
+      }
+
+      // Add to selection
+      selectedDates.push(clickedDate);
+      document.querySelector(`[data-date="${dateStr}"]`).classList.add('selected');
+
+      // If we have 2 dates, validate and show info
+      if (selectedDates.length === 2) {
+        selectedDates.sort((a, b) => a - b);
+        
+        // Check if range is valid
+        if (isDateRangeValid(selectedDates[0], selectedDates[1])) {
+          showSelectedDatesInfo();
+          highlightDateRange();
+        } else {
+          showAlert('warning', '⚠️ El rango seleccionado incluye fechas no disponibles');
+          clearSelection();
+        }
+      }
+    }
+
+    function isDateRangeValid(startDate, endDate) {
+      const current = new Date(startDate);
+      current.setDate(current.getDate() + 1); // Start from day after check-in
+      
+      while (current < endDate) {
+        const dateStr = current.toISOString().split('T')[0];
+        const status = availabilityData[dateStr] || 'available';
+        
+        if (status !== 'available') {
+          return false;
+        }
+        current.setDate(current.getDate() + 1);
+      }
+      return true;
+    }
+
+    function highlightDateRange() {
+      const startDate = selectedDates[0];
+      const endDate = selectedDates[1];
+      const current = new Date(startDate);
+      
+      while (current <= endDate) {
+        const dateStr = current.toISOString().split('T')[0];
+        const dayElement = document.querySelector(`[data-date="${dateStr}"]`);
+        if (dayElement) {
+          dayElement.classList.add('selected');
+        }
+        current.setDate(current.getDate() + 1);
+      }
+    }
+
+    function showSelectedDatesInfo() {
+      const startDate = selectedDates[0];
+      const endDate = selectedDates[1];
+      const nights = Math.ceil((endDate - startDate) / (1000 * 3600 * 24));
+      const total = nights * pricePerNight;
+
+      document.getElementById('selected-checkin').textContent = startDate.toLocaleDateString('es-CL');
+      document.getElementById('selected-checkout').textContent = endDate.toLocaleDateString('es-CL');
+      document.getElementById('selected-nights').textContent = nights;
+      document.getElementById('estimated-price').textContent = new Intl.NumberFormat('es-CL', {
+        style: 'currency',
+        currency: 'CLP'
+      }).format(total);
+
+      // Update reserve button with selected dates
+      const reserveBtn = document.getElementById('reserve-btn');
+      const checkIn = startDate.toISOString().split('T')[0];
+      const checkOut = endDate.toISOString().split('T')[0];
+      reserveBtn.href = `/reservar?checkIn=${checkIn}&checkOut=${checkOut}`;
+
+      document.getElementById('selected-dates-info').style.display = 'block';
+      
+      // Scroll to show the info
+      document.getElementById('selected-dates-info').scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'nearest' 
+      });
+    }
+
+    function clearSelection() {
+      selectedDates = [];
+      document.querySelectorAll('.calendar-day.selected').forEach(el => {
+        el.classList.remove('selected');
+      });
+      document.getElementById('selected-dates-info').style.display = 'none';
+    }
+
+    function changeMonth(direction) {
+      currentMonth += direction;
+      
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      } else if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      
+      // Don't allow going to past months
+      const today = new Date();
+      if (currentYear < today.getFullYear() || 
+          (currentYear === today.getFullYear() && currentMonth < today.getMonth())) {
+        currentMonth = today.getMonth();
+        currentYear = today.getFullYear();
+        return;
+      }
+      
+      clearSelection();
+      loadCalendar();
+    }
+
+    function showCalendarError() {
+      document.getElementById('availability-calendar').innerHTML = `
+        <div class="text-center py-5">
+          <div class="text-danger mb-3">
+            ⚠️ Error al cargar el calendario
+          </div>
+          <button class="btn btn-primary" onclick="loadCalendar()">
+            🔄 Intentar de nuevo
+          </button>
+        </div>
+      `;
+    }
+
+    function showAlert(type, message) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      
+      const container = document.querySelector('.container');
+      container.insertBefore(alertDiv, container.firstChild);
+      
+      setTimeout(() => {
+        alertDiv.remove();
+      }, 5000);
+    }

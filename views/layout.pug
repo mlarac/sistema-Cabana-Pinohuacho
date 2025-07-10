@@ -1,0 +1,61 @@
+doctype html
+html(lang='es')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    title= title
+    link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css', rel='stylesheet')
+    link(href='https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap', rel='stylesheet')
+    link(rel='stylesheet', href='/css/styles.css')
+    
+  body
+    nav.navbar.navbar-expand-lg.navbar-dark.bg-primary.fixed-top
+      .container
+        a.navbar-brand(href='/')
+          strong Cabaña Pino Huacho
+        button.navbar-toggler(type='button', data-bs-toggle='collapse', data-bs-target='#navbarNav')
+          span.navbar-toggler-icon
+        
+        .collapse.navbar-collapse#navbarNav
+          ul.navbar-nav.ms-auto
+            li.nav-item
+              a.nav-link(href='/') Inicio
+            li.nav-item
+              a.nav-link(href='/caracteristicas') Características
+            li.nav-item
+              a.nav-link.btn.btn-warning.text-dark.px-3.mx-2(href='/reservar') Reservar Ahora
+
+    main
+      block content
+    
+    footer.bg-dark.text-light.py-5.mt-5
+      .container
+        .row
+          .col-md-4
+            h5 Cabaña Pino Huacho
+            p Descanso natural en el corazón de la Araucanía. Ubicada en un entorno privilegiado rodeado de bosques nativos.
+          
+          .col-md-4
+            h5 Contacto
+            p
+              | Email: info@pinohuacho.cl
+              br
+              | Teléfono: +56 9 1234 5678
+              br
+              | Dirección: Pino Huacho, IX Región
+          
+          .col-md-4
+            h5 Síguenos
+            .social-links
+              a.text-light.me-3(href='#') Facebook
+              a.text-light.me-3(href='#') Instagram
+              a.text-light(href='#') WhatsApp
+        
+        hr.my-4
+        .text-center
+          p &copy; 2024 Cabaña Pino Huacho. Todos los derechos reservados.
+
+    script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js')
+    script(src='/js/main.js')
+    
+    block scripts
