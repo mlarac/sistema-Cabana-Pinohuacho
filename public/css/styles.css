@@ -87,7 +87,7 @@ body {
 .hero-section {
   height: 100vh;
   background: linear-gradient(rgba(45, 80, 22, 0.3), rgba(30, 136, 229, 0.2)), 
-              url('https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg') center/cover;
+               url('../img/portada.jpg') center/cover;
   display: flex;
   align-items: center;
   position: relative;
