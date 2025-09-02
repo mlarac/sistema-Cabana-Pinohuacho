@@ -21,6 +21,9 @@ router.get('/reservar', reservationController.showBookingForm);
 router.post('/reservar', reservationController.createReservation);
 router.get('/api/availability/:year/:month', reservationController.getAvailability);
 
+// Endpoint para obtener el precio por noche actual
+router.get('/api/precio', priceController.getCurrentPrice);
+
 // Auth routes
 router.get('/admin/login', authController.showLogin);
 router.post('/admin/login', authController.login);

@@ -102,3 +102,17 @@ exports.updateSinglePrice = async (req, res) => {
     res.redirect('/admin/precios?error=single-update-failed');
   }
 };
+
+exports.getCurrentPrice = async (req, res) => {
+  try {
+    // Buscar el precio para hoy ignorando la hora
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const day = await Availability.findOne({ where: { date: today } });
+    let price = 45000; // Valor por defecto
+    if (day && day.price) price = day.price;
+    res.json({ price });
+  } catch (err) {
+    res.status(500).json({ error: 'No se pudo obtener el precio' });
+  }
+};

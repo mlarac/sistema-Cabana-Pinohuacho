@@ -45,14 +45,14 @@ block content
                       label.form-label(for='checkIn') 
                         | 📅 Fecha de Entrada *
                       input.form-control(type='date', id='checkIn', name='checkIn', 
-                        value=formData ? formData.checkIn : '', required, 
+                        value=formData ? formData.checkIn : (prefilledData ? prefilledData.checkIn : ''), required, 
                         min=new Date().toISOString().split('T')[0])
                     
                     .col-md-6.mb-3
                       label.form-label(for='checkOut') 
                         | 📅 Fecha de Salida *
                       input.form-control(type='date', id='checkOut', name='checkOut', 
-                        value=formData ? formData.checkOut : '', required)
+                        value=formData ? formData.checkOut : (prefilledData ? prefilledData.checkOut : ''), required)
 
                   .mb-3
                     label.form-label(for='guests') 

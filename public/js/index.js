@@ -1,11 +1,23 @@
-    let currentMonth = new Date().getMonth();
+let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
     let availabilityData = {};
     let selectedDates = [];
-    const pricePerNight = 150000;
+    let pricePerNight = 45000; // Valor por defecto
+
+    // Obtener precio dinámico desde la API
+    function fetchPricePerNight() {
+      return fetch('/api/precio')
+        .then(res => res.json())
+        .then(data => {
+          if (data.price) pricePerNight = data.price;
+        })
+        .catch(() => { pricePerNight = 45000; });
+    }
 
     document.addEventListener('DOMContentLoaded', function() {
-      loadCalendar();
+      fetchPricePerNight().then(() => {
+        loadCalendar();
+      });
       
       // Add scroll animations
       const observerOptions = {
