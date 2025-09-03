@@ -639,6 +639,20 @@ footer {
   transform: translateY(-2px);
 }
 
+/* Tamaños de fuente para sección Ubicación y Actividades en features.pug */
+.text-section-title {
+  font-size: 2rem;
+}
+.text-section-lead {
+  font-size: 1rem;
+}
+.text-activity-title {
+  font-size: 1.1rem;
+}
+.text-activity-desc {
+  font-size: 0.95rem;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .hero-section {
