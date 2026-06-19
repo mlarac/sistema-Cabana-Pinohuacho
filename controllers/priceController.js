@@ -30,6 +30,7 @@ exports.showPricesPage = async (req, res) => {
     }));
     
     res.render('admin/prices', {
+      layout: 'admin/layout',
       title: 'Gestión de Precios',
       user: req.session.user,
       availabilityData: formattedData

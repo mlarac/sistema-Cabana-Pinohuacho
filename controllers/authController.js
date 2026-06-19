@@ -7,7 +7,8 @@ exports.showLogin = (req, res) => {
   }
   
   res.render('admin/login', {
-    title: 'Acceso Administrativo'
+    title: 'Acceso Administrativo',
+    layout: false
   });
 };
 
@@ -21,6 +22,7 @@ exports.login = [
       if (!errors.isEmpty()) {
         return res.render('admin/login', {
           title: 'Acceso Administrativo',
+          layout: false,
           errors: errors.array(),
           formData: req.body
         });
@@ -35,6 +37,7 @@ exports.login = [
       if (!user || !await user.validatePassword(password) || !user.isAdmin) {
         return res.render('admin/login', {
           title: 'Acceso Administrativo',
+          layout: false,
           errors: [{ msg: 'Credenciales inválidas' }],
           formData: req.body
         });

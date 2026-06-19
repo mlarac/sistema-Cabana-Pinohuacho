@@ -1,0 +1,231 @@
+<% extraStyles = '<link rel="stylesheet" href="/css/booking.css">' %>
+<% extraScripts = '<script src="/js/booking.js"></script>' %>
+
+<section class="py-5 mt-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card shadow-lg">
+          <div class="card-header text-white text-center py-4">
+            <h2 class="mb-0">🏠 Reservar Cabaña Pino Huacho</h2>
+            <p class="mb-0 mt-2">Completa el formulario para confirmar tu reserva</p>
+          </div>
+
+          <div class="card-body p-5">
+            <% if (typeof errors !== 'undefined' && errors && errors.length > 0) { %>
+            <div class="alert alert-danger">
+              ⚠️ Por favor corrige los siguientes errores:
+              <ul class="mb-0 mt-2">
+                <% errors.forEach(function(error) { %>
+                <li><%= error.msg %></li>
+                <% }); %>
+              </ul>
+            </div>
+            <% } %>
+
+            <!-- Progress Steps -->
+            <div class="progress-steps mb-4">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="step active">
+                  <div class="step-number">1</div>
+                  <div class="step-label">Fechas</div>
+                </div>
+                <div class="step-line"></div>
+                <div class="step">
+                  <div class="step-number">2</div>
+                  <div class="step-label">Datos</div>
+                </div>
+                <div class="step-line"></div>
+                <div class="step">
+                  <div class="step-number">3</div>
+                  <div class="step-label">Confirmación</div>
+                </div>
+              </div>
+            </div>
+
+            <form id="bookingForm" method="POST" action="/reservar">
+              <!-- Step 1: Dates -->
+              <div class="booking-step active" id="step-1">
+                <h4 class="mb-4">📅 Paso 1: Selecciona tus fechas</h4>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label" for="checkIn">📅 Fecha de Entrada *</label>
+                    <input class="form-control" type="date" id="checkIn" name="checkIn"
+                      value="<%= (typeof formData !== 'undefined' && formData) ? formData.checkIn : (typeof prefilledData !== 'undefined' && prefilledData) ? prefilledData.checkIn : '' %>"
+                      required
+                      min="<%= new Date().toISOString().split('T')[0] %>">
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label" for="checkOut">📅 Fecha de Salida *</label>
+                    <input class="form-control" type="date" id="checkOut" name="checkOut"
+                      value="<%= (typeof formData !== 'undefined' && formData) ? formData.checkOut : (typeof prefilledData !== 'undefined' && prefilledData) ? prefilledData.checkOut : '' %>"
+                      required>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label" for="guests">👥 Número de Huéspedes *</label>
+                  <select class="form-control" id="guests" name="guests" required>
+                    <option value="" <%= (typeof formData === 'undefined' || !formData || !formData.guests) ? 'selected' : '' %>>Seleccionar...</option>
+                    <% for (let i = 1; i <= 6; i++) { %>
+                    <option value="<%= i %>" <%= (typeof formData !== 'undefined' && formData && formData.guests == i) ? 'selected' : '' %>><%= i + (i === 1 ? ' persona' : ' personas') %></option>
+                    <% } %>
+                  </select>
+                </div>
+
+                <!-- Calendar Preview -->
+                <div class="mb-4">
+                  <h5>📊 Disponibilidad</h5>
+                  <div class="calendar-container">
+                    <div id="calendar-preview" class="border rounded p-3 bg-light">
+                      <p class="text-center text-muted">Selecciona las fechas para ver la disponibilidad</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="text-center">
+                  <button class="btn btn-primary btn-lg" type="button" onclick="nextStep()">
+                    Continuar →
+                  </button>
+                </div>
+              </div>
+
+              <!-- Step 2: Guest Information -->
+              <div class="booking-step" id="step-2" style="display: none;">
+                <h4 class="mb-4">👤 Paso 2: Información del huésped</h4>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label" for="guestName">👤 Nombre Completo *</label>
+                    <input class="form-control" type="text" id="guestName" name="guestName"
+                      value="<%= (typeof formData !== 'undefined' && formData) ? formData.guestName : '' %>" required>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label" for="guestEmail">✉️ Email *</label>
+                    <input class="form-control" type="email" id="guestEmail" name="guestEmail"
+                      value="<%= (typeof formData !== 'undefined' && formData) ? formData.guestEmail : '' %>" required>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label" for="guestPhone">📞 Teléfono *</label>
+                    <input class="form-control" type="tel" id="guestPhone" name="guestPhone"
+                      value="<%= (typeof formData !== 'undefined' && formData) ? formData.guestPhone : '' %>"
+                      required placeholder="+56 9 1234 5678">
+                  </div>
+                </div>
+
+                <div class="mb-4">
+                  <label class="form-label" for="notes">📝 Notas Adicionales</label>
+                  <textarea class="form-control" id="notes" name="notes" rows="3"
+                    placeholder="Comentarios especiales, solicitudes, etc."><%= (typeof formData !== 'undefined' && formData) ? formData.notes : '' %></textarea>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                  <button class="btn btn-outline-primary" type="button" onclick="prevStep()">← Volver</button>
+                  <button class="btn btn-primary btn-lg" type="button" onclick="nextStep()">Continuar →</button>
+                </div>
+              </div>
+
+              <!-- Step 3: Confirmation -->
+              <div class="booking-step" id="step-3" style="display: none;">
+                <h4 class="mb-4">✅ Paso 3: Confirma tu reserva</h4>
+
+                <div class="pricing-info p-4 rounded mb-4">
+                  <h5 class="fw-bold mb-3">💰 Resumen de tu reserva</h5>
+
+                  <div class="reservation-summary">
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>👤 Huésped:</span>
+                      <strong id="summary-name">-</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>✉️ Email:</span>
+                      <strong id="summary-email">-</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>📞 Teléfono:</span>
+                      <strong id="summary-phone">-</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>📅 Entrada:</span>
+                      <strong id="summary-checkin">-</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>📅 Salida:</span>
+                      <strong id="summary-checkout">-</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>👥 Huéspedes:</span>
+                      <strong id="summary-guests">-</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>🌙 Noches:</span>
+                      <strong id="summary-nights">-</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>Precio por noche:</span>
+                      <strong>$150.000 CLP</strong>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between fs-5">
+                      <strong>💰 Total:</strong>
+                      <strong id="summary-total">$0 CLP</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                  <button class="btn btn-outline-primary" type="button" onclick="prevStep()">← Volver</button>
+                  <button class="btn btn-success btn-lg" type="submit">✅ Confirmar Reserva</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Info Section -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 mx-auto text-center">
+        <h3 class="fw-bold mb-4">🎯 Proceso Simple en 3 Pasos</h3>
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="step-card p-4">
+              <div class="step-number d-inline-flex align-items-center justify-content-center mb-3">1</div>
+              <h5>📅 Selecciona Fechas</h5>
+              <p>Elige tus fechas de entrada y salida, y el número de huéspedes</p>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="step-card p-4">
+              <div class="step-number d-inline-flex align-items-center justify-content-center mb-3">2</div>
+              <h5>👤 Completa Datos</h5>
+              <p>Ingresa tu información de contacto y comentarios especiales</p>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="step-card p-4">
+              <div class="step-number d-inline-flex align-items-center justify-content-center mb-3">3</div>
+              <h5>✅ Confirma y Listo</h5>
+              <p>Revisa tu reserva y recibe confirmación por email</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

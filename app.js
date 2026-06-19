@@ -1,4 +1,5 @@
 const express = require('express');
+const ejsLayouts = require('express-ejs-layouts');
 const session = require('express-session');
 const helmet = require('helmet');
 const compression = require('compression');
@@ -31,8 +32,10 @@ app.use(
 app.use(compression());
 
 // View engine setup
-app.set('view engine', 'pug');
+app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.use(ejsLayouts);
+app.set('layout', 'layout');
 
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
