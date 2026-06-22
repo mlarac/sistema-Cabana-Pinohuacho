@@ -8,6 +8,8 @@ require('dotenv').config();
 
 const { sequelize } = require('./models');
 const routes = require('./routes');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -54,6 +56,9 @@ app.use(session({
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
+
+// Swagger UI Route
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes
 app.use('/', routes);
