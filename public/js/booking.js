@@ -10,6 +10,12 @@ class BookingForm {
   init() {
     this.bindEvents();
     this.setupValidation();
+    // If dates are prefilled, trigger pricing update
+    const checkInInput = document.getElementById('checkIn');
+    const checkOutInput = document.getElementById('checkOut');
+    if (checkInInput && checkOutInput && checkInInput.value && checkOutInput.value) {
+      this.updatePricing();
+    }
   }
 
   bindEvents() {
@@ -182,20 +188,53 @@ class BookingForm {
     const checkInDate = new Date(checkIn);
     const checkOutDate = new Date(checkOut);
     const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 3600 * 24));
-    const total = nights * this.pricePerNight;
+
+    const formatUTCDate = (date) => {
+      const day = String(date.getUTCDate()).padStart(2, '0');
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const year = date.getUTCFullYear();
+      return `${day}/${month}/${year}`;
+    };
 
     // Update summary fields
     this.updateSummaryField('summary-name', name);
     this.updateSummaryField('summary-email', email);
     this.updateSummaryField('summary-phone', phone);
-    this.updateSummaryField('summary-checkin', checkInDate.toLocaleDateString('es-CL'));
-    this.updateSummaryField('summary-checkout', checkOutDate.toLocaleDateString('es-CL'));
+    this.updateSummaryField('summary-checkin', formatUTCDate(checkInDate));
+    this.updateSummaryField('summary-checkout', formatUTCDate(checkOutDate));
     this.updateSummaryField('summary-guests', guests + (guests == 1 ? ' persona' : ' personas'));
     this.updateSummaryField('summary-nights', nights);
-    this.updateSummaryField('summary-total', new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP'
-    }).format(total));
+
+    // Fetch dynamic price range
+    fetch(`/api/precio/range?checkIn=${checkIn}&checkOut=${checkOut}`)
+      .then(res => res.json())
+      .then(data => {
+        const total = data.totalPrice;
+        const avgPrice = data.averagePrice;
+        
+        this.updateSummaryField('summary-price-per-night', new Intl.NumberFormat('es-CL', {
+          style: 'currency',
+          currency: 'CLP'
+        }).format(avgPrice) + ' CLP');
+        
+        this.updateSummaryField('summary-total', new Intl.NumberFormat('es-CL', {
+          style: 'currency',
+          currency: 'CLP'
+        }).format(total) + ' CLP');
+      })
+      .catch((err) => {
+        console.error('Error fetching range price:', err);
+        const total = nights * this.pricePerNight;
+        this.updateSummaryField('summary-price-per-night', new Intl.NumberFormat('es-CL', {
+          style: 'currency',
+          currency: 'CLP'
+        }).format(this.pricePerNight) + ' CLP');
+        
+        this.updateSummaryField('summary-total', new Intl.NumberFormat('es-CL', {
+          style: 'currency',
+          currency: 'CLP'
+        }).format(total) + ' CLP');
+      });
   }
 
   updateSummaryField(elementId, value) {

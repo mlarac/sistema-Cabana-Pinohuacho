@@ -2,7 +2,7 @@ let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
     let availabilityData = {};
     let selectedDates = [];
-    let pricePerNight = 45000; // Valor por defecto
+    let pricePerNight = 150000; // Valor por defecto
 
     // Obtener precio dinámico desde la API
     function fetchPricePerNight() {
@@ -11,7 +11,7 @@ let currentMonth = new Date().getMonth();
         .then(data => {
           if (data.price) pricePerNight = data.price;
         })
-        .catch(() => { pricePerNight = 45000; });
+        .catch(() => { pricePerNight = 150000; });
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -212,21 +212,43 @@ let currentMonth = new Date().getMonth();
     function showSelectedDatesInfo() {
       const startDate = selectedDates[0];
       const endDate = selectedDates[1];
-      const nights = Math.ceil((endDate - startDate) / (1000 * 3600 * 24));
-      const total = nights * pricePerNight;
+      const checkIn = startDate.toISOString().split('T')[0];
+      const checkOut = endDate.toISOString().split('T')[0];
 
-      document.getElementById('selected-checkin').textContent = startDate.toLocaleDateString('es-CL');
-      document.getElementById('selected-checkout').textContent = endDate.toLocaleDateString('es-CL');
+      const formatUTCDate = (date) => {
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const year = date.getUTCFullYear();
+        return `${day}/${month}/${year}`;
+      };
+
+      document.getElementById('selected-checkin').textContent = formatUTCDate(startDate);
+      document.getElementById('selected-checkout').textContent = formatUTCDate(endDate);
+      
+      const nights = Math.ceil((endDate - startDate) / (1000 * 3600 * 24));
       document.getElementById('selected-nights').textContent = nights;
-      document.getElementById('estimated-price').textContent = new Intl.NumberFormat('es-CL', {
-        style: 'currency',
-        currency: 'CLP'
-      }).format(total);
+
+      // Fetch dynamic price range
+      fetch(`/api/precio/range?checkIn=${checkIn}&checkOut=${checkOut}`)
+        .then(res => res.json())
+        .then(data => {
+          const total = data.totalPrice || (nights * pricePerNight);
+          document.getElementById('estimated-price').textContent = new Intl.NumberFormat('es-CL', {
+            style: 'currency',
+            currency: 'CLP'
+          }).format(total);
+        })
+        .catch((err) => {
+          console.error('Error fetching range price:', err);
+          const total = nights * pricePerNight;
+          document.getElementById('estimated-price').textContent = new Intl.NumberFormat('es-CL', {
+            style: 'currency',
+            currency: 'CLP'
+          }).format(total);
+        });
 
       // Update reserve button with selected dates
       const reserveBtn = document.getElementById('reserve-btn');
-      const checkIn = startDate.toISOString().split('T')[0];
-      const checkOut = endDate.toISOString().split('T')[0];
       reserveBtn.href = `/reservar?checkIn=${checkIn}&checkOut=${checkOut}`;
 
       document.getElementById('selected-dates-info').style.display = 'block';

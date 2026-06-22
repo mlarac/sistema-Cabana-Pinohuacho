@@ -17,11 +17,41 @@ exports.showBookingForm = async (req, res) => {
     // Get query parameters for pre-filled dates
     const { checkIn, checkOut } = req.query;
     
+    let pricePerNight = 150000; // Por defecto
+    let totalPrice = 0;
+    let nights = 0;
+    
+    if (checkIn && checkOut) {
+      const start = moment(checkIn);
+      const end = moment(checkOut);
+      if (start.isValid() && end.isValid() && end.isAfter(start)) {
+        nights = end.diff(start, 'days');
+        let current = start.clone();
+        while (current.isBefore(end)) {
+          const dayRecord = await Availability.findOne({
+            where: { date: current.toDate() }
+          });
+          totalPrice += dayRecord && dayRecord.price ? parseFloat(dayRecord.price) : 150000;
+          current.add(1, 'day');
+        }
+        pricePerNight = nights > 0 ? totalPrice / nights : 150000;
+      }
+    } else {
+      // Obtener el precio de hoy
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const dayRecord = await Availability.findOne({ where: { date: today } });
+      pricePerNight = dayRecord && dayRecord.price ? parseFloat(dayRecord.price) : 150000;
+    }
+
     res.render('booking', {
       title: 'Reservar Cabaña - Pino Huacho',
       prefilledData: {
         checkIn: checkIn || '',
-        checkOut: checkOut || ''
+        checkOut: checkOut || '',
+        pricePerNight,
+        totalPrice,
+        nights
       }
     });
   } catch (error) {
@@ -85,10 +115,17 @@ exports.createReservation = [
         });
       }
 
-      // Calculate total price
-      const nights = checkOutDate.diff(checkInDate, 'days');
-      const pricePerNight = 150000; // CLP
-      const totalPrice = nights * pricePerNight;
+      // Calculate total price dynamically from database
+      let totalPrice = 0;
+      let current = checkInDate.clone();
+      while (current.isBefore(checkOutDate)) {
+        const dayRecord = await Availability.findOne({
+          where: { date: current.toDate() }
+        });
+        const dailyPrice = dayRecord && dayRecord.price ? parseFloat(dayRecord.price) : 150000;
+        totalPrice += dailyPrice;
+        current.add(1, 'day');
+      }
 
       // Create reservation
       const reservation = await Reservation.create({

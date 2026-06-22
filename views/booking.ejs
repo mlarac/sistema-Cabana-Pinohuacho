@@ -165,18 +165,22 @@
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                       <span>🌙 Noches:</span>
-                      <strong id="summary-nights">-</strong>
+                      <strong id="summary-nights"><%= prefilledData.nights || '-' %></strong>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                       <span>Precio por noche:</span>
-                      <strong>$150.000 CLP</strong>
+                      <strong id="summary-price-per-night">
+                        <%= new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(prefilledData.pricePerNight) %> CLP
+                      </strong>
                     </div>
 
                     <hr>
 
                     <div class="d-flex justify-content-between fs-5">
                       <strong>💰 Total:</strong>
-                      <strong id="summary-total">$0 CLP</strong>
+                      <strong id="summary-total">
+                        <%= new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(prefilledData.totalPrice) %> CLP
+                      </strong>
                     </div>
                   </div>
                 </div>

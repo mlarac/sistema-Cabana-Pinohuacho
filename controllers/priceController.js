@@ -110,10 +110,48 @@ exports.getCurrentPrice = async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const day = await Availability.findOne({ where: { date: today } });
-    let price = 45000; // Valor por defecto
-    if (day && day.price) price = day.price;
+    let price = 150000; // Valor por defecto
+    if (day && day.price) price = parseFloat(day.price);
     res.json({ price });
   } catch (err) {
     res.status(500).json({ error: 'No se pudo obtener el precio' });
+  }
+};
+
+exports.getPriceRange = async (req, res) => {
+  try {
+    const { checkIn, checkOut } = req.query;
+    if (!checkIn || !checkOut) {
+      return res.status(400).json({ error: 'Faltan fechas de entrada o salida' });
+    }
+    const start = moment(checkIn);
+    const end = moment(checkOut);
+    if (!start.isValid() || !end.isValid() || end.isSameOrBefore(start)) {
+      return res.status(400).json({ error: 'Fechas inválidas' });
+    }
+
+    let totalPrice = 0;
+    const prices = [];
+    let current = start.clone();
+    while (current.isBefore(end)) {
+      const day = await Availability.findOne({ where: { date: current.toDate() } });
+      const price = day && day.price ? parseFloat(day.price) : 150000;
+      prices.push({
+        date: current.format('YYYY-MM-DD'),
+        price
+      });
+      totalPrice += price;
+      current.add(1, 'day');
+    }
+
+    res.json({
+      totalPrice,
+      prices,
+      nights: prices.length,
+      averagePrice: totalPrice / prices.length
+    });
+  } catch (err) {
+    console.error('Error in getPriceRange:', err);
+    res.status(500).json({ error: 'No se pudo obtener el precio del rango' });
   }
 };

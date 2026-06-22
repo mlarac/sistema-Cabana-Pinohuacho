@@ -23,6 +23,7 @@ router.get('/api/availability/:year/:month', reservationController.getAvailabili
 
 // Endpoint para obtener el precio por noche actual
 router.get('/api/precio', priceController.getCurrentPrice);
+router.get('/api/precio/range', priceController.getPriceRange);
 
 // Auth routes
 router.get('/admin/login', authController.showLogin);
