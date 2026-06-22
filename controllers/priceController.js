@@ -110,7 +110,7 @@ exports.getCurrentPrice = async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const day = await Availability.findOne({ where: { date: today } });
-    let price = 150000; // Valor por defecto
+    let price = 50000; // Valor por defecto
     if (day && day.price) price = parseFloat(day.price);
     res.json({ price });
   } catch (err) {
@@ -135,7 +135,7 @@ exports.getPriceRange = async (req, res) => {
     let current = start.clone();
     while (current.isBefore(end)) {
       const day = await Availability.findOne({ where: { date: current.toDate() } });
-      const price = day && day.price ? parseFloat(day.price) : 150000;
+      const price = day && day.price ? parseFloat(day.price) : 50000;
       prices.push({
         date: current.format('YYYY-MM-DD'),
         price

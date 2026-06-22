@@ -17,7 +17,7 @@ exports.showBookingForm = async (req, res) => {
     // Get query parameters for pre-filled dates
     const { checkIn, checkOut } = req.query;
     
-    let pricePerNight = 150000; // Por defecto
+    let pricePerNight = 50000; // Por defecto
     let totalPrice = 0;
     let nights = 0;
     
@@ -31,17 +31,17 @@ exports.showBookingForm = async (req, res) => {
           const dayRecord = await Availability.findOne({
             where: { date: current.toDate() }
           });
-          totalPrice += dayRecord && dayRecord.price ? parseFloat(dayRecord.price) : 150000;
+          totalPrice += dayRecord && dayRecord.price ? parseFloat(dayRecord.price) : 50000;
           current.add(1, 'day');
         }
-        pricePerNight = nights > 0 ? totalPrice / nights : 150000;
+        pricePerNight = nights > 0 ? totalPrice / nights : 50000;
       }
     } else {
       // Obtener el precio de hoy
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const dayRecord = await Availability.findOne({ where: { date: today } });
-      pricePerNight = dayRecord && dayRecord.price ? parseFloat(dayRecord.price) : 150000;
+      pricePerNight = dayRecord && dayRecord.price ? parseFloat(dayRecord.price) : 50000;
     }
 
     res.render('booking', {
@@ -122,7 +122,7 @@ exports.createReservation = [
         const dayRecord = await Availability.findOne({
           where: { date: current.toDate() }
         });
-        const dailyPrice = dayRecord && dayRecord.price ? parseFloat(dayRecord.price) : 150000;
+        const dailyPrice = dayRecord && dayRecord.price ? parseFloat(dayRecord.price) : 50000;
         totalPrice += dailyPrice;
         current.add(1, 'day');
       }

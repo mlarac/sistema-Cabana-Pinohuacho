@@ -3,7 +3,7 @@ class BookingForm {
   constructor() {
     this.currentStep = 1;
     this.totalSteps = 3;
-    this.pricePerNight = 150000;
+    this.pricePerNight = 50000;
     this.init();
   }
 

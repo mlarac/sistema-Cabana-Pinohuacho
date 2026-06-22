@@ -2,7 +2,7 @@ let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
     let availabilityData = {};
     let selectedDates = [];
-    let pricePerNight = 150000; // Valor por defecto
+    let pricePerNight = 50000; // Valor por defecto
 
     // Obtener precio dinámico desde la API
     function fetchPricePerNight() {
@@ -11,7 +11,7 @@ let currentMonth = new Date().getMonth();
         .then(data => {
           if (data.price) pricePerNight = data.price;
         })
-        .catch(() => { pricePerNight = 150000; });
+        .catch(() => { pricePerNight = 50000; });
     }
 
     document.addEventListener('DOMContentLoaded', function() {

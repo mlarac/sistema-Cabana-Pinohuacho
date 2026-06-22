@@ -163,14 +163,17 @@
                       <span>👥 Huéspedes:</span>
                       <strong id="summary-guests">-</strong>
                     </div>
+                    <% 
+                      const pData = (typeof prefilledData !== 'undefined' && prefilledData) ? prefilledData : { nights: 0, pricePerNight: 50000, totalPrice: 0 };
+                    %>
                     <div class="d-flex justify-content-between mb-2">
                       <span>🌙 Noches:</span>
-                      <strong id="summary-nights"><%= prefilledData.nights || '-' %></strong>
+                      <strong id="summary-nights"><%= pData.nights || '-' %></strong>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                       <span>Precio por noche:</span>
                       <strong id="summary-price-per-night">
-                        <%= new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(prefilledData.pricePerNight) %> CLP
+                        <%= new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(pData.pricePerNight) %> CLP
                       </strong>
                     </div>
 
@@ -179,7 +182,7 @@
                     <div class="d-flex justify-content-between fs-5">
                       <strong>💰 Total:</strong>
                       <strong id="summary-total">
-                        <%= new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(prefilledData.totalPrice) %> CLP
+                        <%= new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(pData.totalPrice) %> CLP
                       </strong>
                     </div>
                   </div>
