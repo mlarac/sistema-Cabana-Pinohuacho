@@ -1,0 +1,227 @@
+<% extraScripts = `
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const editButtons = document.querySelectorAll('.edit-price-btn');
+    const editModal = new bootstrap.Modal(document.getElementById('editPriceModal'));
+
+    editButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const dayId = this.dataset.id;
+        const date = this.dataset.date;
+        const price = this.dataset.price;
+        document.getElementById('editDayId').value = dayId;
+        document.getElementById('editDate').value = date;
+        document.getElementById('editPrice').value = price;
+        editModal.show();
+      });
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success')) {
+      showAlert(getSuccessMessage(urlParams.get('success')), 'success');
+    }
+    if (urlParams.get('error')) {
+      showAlert(getErrorMessage(urlParams.get('error')), 'danger');
+    }
+  });
+
+  function getSuccessMessage(type) {
+    const messages = {
+      'category-updated': 'Precios actualizados por categoría exitosamente',
+      'range-updated': 'Precios actualizados por rango de fechas exitosamente',
+      'single-updated': 'Precio individual actualizado exitosamente'
+    };
+    return messages[type] || 'Operación completada exitosamente';
+  }
+
+  function getErrorMessage(type) {
+    const messages = {
+      'category-update-failed': 'Error al actualizar precios por categoría',
+      'range-update-failed': 'Error al actualizar precios por rango de fechas',
+      'single-update-failed': 'Error al actualizar precio individual'
+    };
+    return messages[type] || 'Ha ocurrido un error';
+  }
+
+  function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-' + type + ' alert-dismissible fade show';
+    alertDiv.innerHTML = message + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alertDiv, container.firstChild);
+    setTimeout(() => { alertDiv.remove(); }, 5000);
+  }
+</script>
+` %>
+
+<div class="container-fluid py-4">
+  <h1 class="h3 mb-4">Gestión de Precios</h1>
+
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <div class="card shadow">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+          <h6 class="m-0 font-weight-bold">Actualizar Precios por Categoría</h6>
+        </div>
+        <div class="card-body">
+          <form id="updateCategoryForm" action="/admin/precios/update-category" method="POST">
+            <div class="mb-3">
+              <label class="form-label" for="category">Categoría de Precio</label>
+              <select class="form-select" id="category" name="category" required>
+                <option value="normal">Normal</option>
+                <option value="weekend">Fin de Semana</option>
+                <option value="high_season">Temporada Alta</option>
+                <option value="holiday">Feriado</option>
+                <option value="special">Especial</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="categoryPrice">Precio (CLP)</label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input class="form-control" id="categoryPrice" type="number" name="price" min="0" step="1000" required>
+              </div>
+            </div>
+
+            <button class="btn btn-primary w-100" type="submit">Actualizar Precios por Categoría</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+      <div class="card shadow">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+          <h6 class="m-0 font-weight-bold">Actualizar Precios por Rango de Fechas</h6>
+        </div>
+        <div class="card-body">
+          <form id="updateRangeForm" action="/admin/precios/update-range" method="POST">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="startDate">Fecha Inicio</label>
+                <input class="form-control" id="startDate" type="date" name="startDate" required>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="endDate">Fecha Fin</label>
+                <input class="form-control" id="endDate" type="date" name="endDate" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="rangePrice">Precio (CLP)</label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input class="form-control" id="rangePrice" type="number" name="price" min="0" step="1000" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="rangeCategory">Categoría (opcional)</label>
+              <select class="form-select" id="rangeCategory" name="category">
+                <option value="">Sin cambiar categoría</option>
+                <option value="normal">Normal</option>
+                <option value="weekend">Fin de Semana</option>
+                <option value="high_season">Temporada Alta</option>
+                <option value="holiday">Feriado</option>
+                <option value="special">Especial</option>
+              </select>
+            </div>
+
+            <button class="btn btn-primary w-100" type="submit">Actualizar Precios por Rango</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 mb-4">
+      <div class="card shadow">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+          <h6 class="m-0 font-weight-bold">Vista Previa de Precios</h6>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Día</th>
+                  <th>Categoría</th>
+                  <th>Precio</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="pricePreviewTable">
+                <% availabilityData.forEach(function(day) { %>
+                <tr class="<%= day.status === 'occupied' ? 'table-danger' : day.status === 'maintenance' ? 'table-warning' : '' %>">
+                  <td><%= day.formattedDate %></td>
+                  <td><%= day.dayOfWeek %></td>
+                  <td><%= day.priceCategory %></td>
+                  <td><%= day.formattedPrice %></td>
+                  <td>
+                    <span class="badge <%= day.status === 'available' ? 'bg-success' : day.status === 'occupied' ? 'bg-danger' : 'bg-warning' %>"><%= day.status %></span>
+                  </td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-primary edit-price-btn"
+                      data-id="<%= day.id %>"
+                      data-date="<%= day.formattedDate %>"
+                      data-price="<%= day.price %>">Editar</button>
+                  </td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Price Modal -->
+  <div id="editPriceModal" class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Precio</h5>
+          <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editSinglePriceForm" action="/admin/precios/update-single" method="POST">
+            <input type="hidden" name="dayId" id="editDayId">
+            <div class="mb-3">
+              <label class="form-label" for="editDate">Fecha</label>
+              <input class="form-control" id="editDate" type="text" readonly>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="editPrice">Precio (CLP)</label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input class="form-control" id="editPrice" type="number" name="price" min="0" step="1000" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="editCategory">Categoría</label>
+              <select class="form-select" id="editCategory" name="category">
+                <option value="normal">Normal</option>
+                <option value="weekend">Fin de Semana</option>
+                <option value="high_season">Temporada Alta</option>
+                <option value="holiday">Feriado</option>
+                <option value="special">Especial</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-primary" type="submit" form="editSinglePriceForm">Guardar Cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

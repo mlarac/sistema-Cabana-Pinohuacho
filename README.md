@@ -125,7 +125,7 @@ EMAIL_PASS=tu-contraseña-de-aplicacion
 ### Cambiar Precios
 Edita el archivo `controllers/reservationController.js`:
 ```javascript
-const pricePerNight = 150000; // Cambiar precio por noche en CLP
+const pricePerNight = 50000; // Cambiar precio por noche en CLP
 ```
 
 ### Modificar Capacidad

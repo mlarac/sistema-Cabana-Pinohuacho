@@ -1,0 +1,258 @@
+<% extraScripts = `
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const successIcon = document.querySelector('.success-icon');
+    if (successIcon) {
+      successIcon.style.fontSize = '4rem';
+      successIcon.style.animation = 'bounce 2s infinite';
+    }
+
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.step-card, .info-card').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(el);
+    });
+  });
+</script>
+<style>
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+  }
+  .success-icon {
+    font-size: 4rem;
+    animation: bounce 2s infinite;
+  }
+  .detail-item strong { color: var(--primary-color); }
+  .step-card, .info-card { transition: all 0.3s ease; }
+  .step-card:hover, .info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+  }
+</style>
+` %>
+
+<section class="py-5 mt-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <div class="card shadow-lg">
+          <div class="card-body p-5">
+            <div class="success-icon mb-4">✅</div>
+
+            <h1 class="display-5 fw-bold text-success mb-4">🎉 ¡Reserva Confirmada!</h1>
+
+            <p class="lead mb-4">Tu reserva ha sido procesada exitosamente. Hemos enviado un email de confirmación a tu dirección de correo con todos los detalles.</p>
+
+            <div class="reservation-details bg-light p-4 rounded mb-4">
+              <h4 class="fw-bold mb-3">📋 Detalles de tu Reserva</h4>
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="detail-item">
+                    <strong>👤 Huésped:</strong>
+                    <p class="mb-0"><%= reservation.guestName %></p>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="detail-item">
+                    <strong>✉️ Email:</strong>
+                    <p class="mb-0"><%= reservation.guestEmail %></p>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="detail-item">
+                    <strong>📞 Teléfono:</strong>
+                    <p class="mb-0"><%= reservation.guestPhone %></p>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="detail-item">
+                    <strong>👥 Huéspedes:</strong>
+                    <p class="mb-0"><%= reservation.guests + (reservation.guests === 1 ? ' persona' : ' personas') %></p>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="detail-item">
+                    <strong>📅 Check-in:</strong>
+                    <p class="mb-0"><%= reservation.checkIn %></p>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="detail-item">
+                    <strong>📅 Check-out:</strong>
+                    <p class="mb-0"><%= reservation.checkOut %></p>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="my-3">
+
+              <div class="text-center">
+                <h5 class="fw-bold">💰 Total Pagado: <%= reservation.totalPrice %></h5>
+              </div>
+            </div>
+
+            <div class="next-steps mb-4">
+              <h4 class="fw-bold mb-3">🎯 Próximos Pasos</h4>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <div class="step-card p-3 border rounded h-100">
+                    ✉️
+                    <h6 class="mt-2 fw-bold">Revisa tu Email</h6>
+                    <p class="small">Encontrarás todos los detalles de tu reserva y las instrucciones</p>
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <div class="step-card p-3 border rounded h-100">
+                    🗺️
+                    <h6 class="mt-2 fw-bold">Planifica tu Viaje</h6>
+                    <p class="small">Te enviaremos las indicaciones exactas para llegar</p>
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <div class="step-card p-3 border rounded h-100">
+                    ❤️
+                    <h6 class="mt-2 fw-bold">¡Disfruta!</h6>
+                    <p class="small">Relájate y conecta con la naturaleza en Pino Huacho</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="action-buttons">
+              <a class="btn btn-primary btn-lg me-3" href="/">🏠 Volver al Inicio</a>
+              <a class="btn btn-outline-primary btn-lg" href="/caracteristicas">📋 Ver Características</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <h3 class="fw-bold mb-4">ℹ️ Información Importante</h3>
+
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="info-card p-4 border rounded bg-white h-100">
+              🕐
+              <h5 class="mt-3 fw-bold">Horarios</h5>
+              <p><strong>Check-in:</strong> 15:00 hrs</p>
+              <p class="mb-0"><strong>Check-out:</strong> 11:00 hrs</p>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="info-card p-4 border rounded bg-white h-100">
+              📞
+              <h5 class="mt-3 fw-bold">Contacto</h5>
+              <p><strong>Teléfono:</strong> +56 9 1234 5678</p>
+              <p class="mb-0"><strong>Email:</strong> info@pinohuacho.cl</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4 mt-2">
+          <div class="col-md-6">
+            <div class="info-card p-4 border rounded bg-white h-100">
+              🎒
+              <h5 class="mt-3 fw-bold">Qué Traer</h5>
+              <ul class="list-unstyled text-start small">
+                <li>• Ropa abrigada</li>
+                <li>• Calzado para caminar</li>
+                <li>• Protector solar</li>
+                <li>• Cámara fotográfica</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="info-card p-4 border rounded bg-white h-100">
+              📋
+              <h5 class="mt-3 fw-bold">Incluido</h5>
+              <ul class="list-unstyled text-start small">
+                <li>• Ropa de cama y toallas</li>
+                <li>• Wi-Fi gratuito</li>
+                <li>• Estacionamiento</li>
+                <li>• Uso de parrilla</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <div class="alert alert-info">
+            ℹ️ <strong class="ms-2">Nota Importante: </strong>
+            Si tienes alguna consulta o necesitas modificar tu reserva, no dudes en contactarnos.
+            Te responderemos a la brevedad para asegurar que tengas la mejor experiencia posible.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Weather and Tips Section -->
+<section class="py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h4 class="fw-bold mb-4 text-center">🌤️ Consejos para tu Estadía</h4>
+
+            <div class="row g-4">
+              <div class="col-md-6">
+                <h6 class="fw-bold">🌡️ Clima en la Araucanía</h6>
+                <p class="small">La región tiene un clima templado lluvioso. Te recomendamos traer ropa impermeable y abrigada, especialmente en invierno (junio-agosto).</p>
+              </div>
+
+              <div class="col-md-6">
+                <h6 class="fw-bold">🛒 Compras Cercanas</h6>
+                <p class="small">El pueblo más cercano está a 15 minutos en auto. Recomendamos traer provisiones básicas o hacer compras antes de llegar.</p>
+              </div>
+
+              <div class="col-md-6">
+                <h6 class="fw-bold">🚗 Acceso a la Cabaña</h6>
+                <p class="small">El camino es transitable todo el año. Los últimos 2 km son de ripio en buen estado. Cualquier vehículo puede acceder sin problemas.</p>
+              </div>
+
+              <div class="col-md-6">
+                <h6 class="fw-bold">📱 Conectividad</h6>
+                <p class="small">Hay cobertura móvil y Wi-Fi disponible. Perfecto para compartir tus fotos de la naturaleza o trabajar remotamente si es necesario.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

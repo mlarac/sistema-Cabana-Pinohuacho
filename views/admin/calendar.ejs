@@ -1,0 +1,263 @@
+<% extraStyles = `
+<style>
+  .calendar-container {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background-color: #dee2e6;
+    border: 1px solid #dee2e6;
+  }
+  .calendar-header {
+    background-color: #f8f9fa;
+    padding: 0.75rem;
+    font-weight: bold;
+    text-align: center;
+    border: 1px solid #dee2e6;
+  }
+  .calendar-day {
+    background-color: white;
+    padding: 0.75rem;
+    min-height: 60px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .calendar-day:hover { background-color: #f8f9fa; }
+  .calendar-day.available { background-color: #d4edda; color: #155724; }
+  .calendar-day.occupied { background-color: #f8d7da; color: #721c24; }
+  .calendar-day.maintenance { background-color: #fff3cd; color: #856404; }
+  .calendar-day.selected {
+    border: 2px solid #007bff !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+  .calendar-legend { width: 20px; height: 20px; border-radius: 3px; }
+  .calendar-day.other-month { color: #6c757d; background-color: #f8f9fa; }
+</style>
+` %>
+
+<% extraScripts = `
+<script>
+  let currentMonth = new Date().getMonth();
+  let currentYear = new Date().getFullYear();
+  let selectedDate = null;
+  let availabilityData = {};
+
+  document.addEventListener('DOMContentLoaded', function() {
+    loadCalendar();
+
+    document.getElementById('monthSelector').addEventListener('change', function() {
+      const selectedMonth = parseInt(this.value);
+      currentMonth = selectedMonth;
+      currentYear = new Date().getFullYear();
+      if (selectedMonth < new Date().getMonth()) {
+        currentYear++;
+      }
+      loadCalendar();
+    });
+
+    document.getElementById('availabilityForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      updateAvailability();
+    });
+  });
+
+  function loadCalendar() {
+    fetch('/api/availability/' + currentYear + '/' + (currentMonth + 1).toString().padStart(2, '0'))
+      .then(response => response.json())
+      .then(data => {
+        availabilityData = data;
+        renderCalendar();
+      })
+      .catch(error => {
+        console.error('Error loading calendar:', error);
+        showAlert('danger', 'Error al cargar el calendario');
+      });
+  }
+
+  function renderCalendar() {
+    const container = document.getElementById('calendar-container');
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+    let html = '<div class="calendar-container">';
+
+    const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    dayNames.forEach(day => {
+      html += '<div class="calendar-header">' + day + '</div>';
+    });
+
+    const current = new Date(startDate);
+    for (let week = 0; week < 6; week++) {
+      let hasCurrentMonth = false;
+      for (let day = 0; day < 7; day++) {
+        const dateStr = current.toISOString().split('T')[0];
+        const isCurrentMonth = current.getMonth() === currentMonth;
+        const status = availabilityData[dateStr] || 'available';
+        if (isCurrentMonth) hasCurrentMonth = true;
+        html += '<div class="calendar-day ' + status + ' ' + (!isCurrentMonth ? 'other-month' : '') + '" onclick="selectDate(\'' + dateStr + '\')" data-date="' + dateStr + '">' + current.getDate() + '</div>';
+        current.setDate(current.getDate() + 1);
+      }
+      if (!hasCurrentMonth && week > 3) break;
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  function selectDate(dateStr) {
+    document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
+    document.querySelector('[data-date="' + dateStr + '"]').classList.add('selected');
+    selectedDate = dateStr;
+    document.getElementById('selectedDate').value = dateStr;
+    const currentStatus = availabilityData[dateStr] || 'available';
+    document.getElementById('status').value = currentStatus;
+  }
+
+  function showAvailabilityModal() {
+    if (!selectedDate) {
+      showAlert('warning', 'Por favor selecciona una fecha primero');
+      return;
+    }
+    const modal = new bootstrap.Modal(document.getElementById('availabilityModal'));
+    modal.show();
+  }
+
+  function updateAvailability() {
+    const formData = new FormData(document.getElementById('availabilityForm'));
+    const data = Object.fromEntries(formData.entries());
+
+    fetch('/admin/availability', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        showAlert('success', result.message);
+        availabilityData[data.date] = data.status;
+        renderCalendar();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('availabilityModal'));
+        modal.hide();
+        document.getElementById('availabilityForm').reset();
+        selectedDate = null;
+      } else {
+        showAlert('danger', result.error || 'Error al actualizar disponibilidad');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showAlert('danger', 'Error de conexión');
+    });
+  }
+
+  function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-' + type + ' alert-dismissible fade show';
+    alertDiv.innerHTML = message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+    const container = document.querySelector('main');
+    container.insertBefore(alertDiv, container.firstChild);
+    setTimeout(() => { alertDiv.remove(); }, 5000);
+  }
+</script>
+` %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="display-6 fw-bold">Calendario de Disponibilidad</h1>
+  <div class="d-flex gap-2">
+    <button class="btn btn-primary" onclick="showAvailabilityModal()">Actualizar Disponibilidad</button>
+    <select class="form-select" id="monthSelector" style="width: auto;">
+      <% for (let i = 0; i < 12; i++) { %>
+      <% const date = new Date(); date.setMonth(i); %>
+      <option value="<%= i %>" <%= i === new Date().getMonth() ? 'selected' : '' %>><%= date.toLocaleDateString('es-CL', { month: 'long', year: 'numeric' }) %></option>
+      <% } %>
+    </select>
+  </div>
+</div>
+
+<!-- Legend -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body py-3">
+    <div class="row text-center">
+      <div class="col-auto">
+        <div class="d-flex align-items-center">
+          <div class="calendar-legend bg-success me-2"></div>
+          <span>Disponible</span>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div class="d-flex align-items-center">
+          <div class="calendar-legend bg-danger me-2"></div>
+          <span>Ocupado</span>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div class="d-flex align-items-center">
+          <div class="calendar-legend bg-warning me-2"></div>
+          <span>Mantenimiento</span>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div class="d-flex align-items-center">
+          <div class="calendar-legend border border-2 border-primary me-2"></div>
+          <span>Seleccionado</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Calendar Container -->
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <div id="calendar-container" class="text-center">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando calendario...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Availability Modal -->
+<div class="modal fade" id="availabilityModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Actualizar Disponibilidad</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="availabilityForm">
+          <div class="mb-3">
+            <label class="form-label" for="selectedDate">Fecha</label>
+            <input class="form-control" type="date" id="selectedDate" name="date" required readonly>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="status">Estado</label>
+            <select class="form-control" id="status" name="status" required>
+              <option value="available">Disponible</option>
+              <option value="occupied">Ocupado</option>
+              <option value="maintenance">Mantenimiento</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="notes">Notas (opcional)</label>
+            <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-primary" type="submit" form="availabilityForm">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>

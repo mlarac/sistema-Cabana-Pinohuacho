@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     price: {
       type: DataTypes.DECIMAL(10, 2),
-      defaultValue: 150000 // Default price in CLP
+      defaultValue: 50000 // Default price in CLP
     },
     priceCategory: {
       type: DataTypes.ENUM('normal', 'weekend', 'high_season', 'holiday', 'special'),
@@ -73,7 +73,7 @@ module.exports = (sequelize, DataTypes) => {
         defaults: {
           date: new Date(current),
           status: 'available',
-          price: 150000
+          price: 50000
         }
       });
       current.setDate(current.getDate() + 1);

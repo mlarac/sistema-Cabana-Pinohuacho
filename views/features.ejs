@@ -1,0 +1,354 @@
+<% extraScripts = `
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.feature-card, .gallery-item, .activity-card, .card').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(el);
+    });
+
+    document.querySelectorAll('.spec-row').forEach(row => {
+      row.addEventListener('mouseenter', function() {
+        this.style.backgroundColor = 'rgba(45, 80, 22, 0.05)';
+        this.style.paddingLeft = '1rem';
+      });
+      row.addEventListener('mouseleave', function() {
+        this.style.backgroundColor = '';
+        this.style.paddingLeft = '';
+      });
+    });
+  });
+</script>
+` %>
+
+<section class="py-5 mt-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5">
+        <h1 class="display-4 fw-bold">🏠 Características de la Cabaña</h1>
+        <p class="lead">Descubre todo lo que nuestra cabaña tiene para ofrecerte en el corazón de la Araucanía</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4">
+      <% features.forEach(function(feature) { %>
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm feature-card">
+          <div class="card-body text-center p-4">
+            <div class="feature-icon mb-4">
+              <% if (feature.icon === 'home') { %>🏠
+              <% } else if (feature.icon === 'wifi') { %>📶
+              <% } else if (feature.icon === 'car') { %>🚗
+              <% } else if (feature.icon === 'flame') { %>🔥
+              <% } else if (feature.icon === 'utensils') { %>🍽️
+              <% } else if (feature.icon === 'tree-pine') { %>🌲
+              <% } else { %>✨<% } %>
+            </div>
+            <h5 class="card-title fw-bold"><%= feature.title %></h5>
+            <p class="card-text"><%= feature.description %></p>
+          </div>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+<!-- Detailed Amenities Section -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-6">
+        <h2 class="display-6 fw-bold mb-4">✨ Comodidades Completas</h2>
+        <div class="amenities-list">
+          <div class="amenity-item d-flex align-items-center mb-3">
+            ✅ <span class="ms-3">Ropa de cama</span>
+          </div>
+          <div class="amenity-item d-flex align-items-center mb-3">
+            ✅ <span class="ms-3">TV</span>
+          </div>
+          <div class="amenity-item d-flex align-items-center mb-3">
+            ✅ <span class="ms-3">Parrilla para asados al aire libre</span>
+          </div>
+          <div class="amenity-item d-flex align-items-center mb-3">
+            ✅ <span class="ms-3">Utensilios de cocina completos</span>
+          </div>
+          <div class="amenity-item d-flex align-items-center mb-3">
+            ✅ <span class="ms-3">Terraza con vista panorámica</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="cabin-specs p-4 rounded-3 shadow-sm">
+          <h4 class="fw-bold mb-4">📋 Especificaciones Técnicas</h4>
+
+          <div class="spec-row d-flex justify-content-between py-3 border-bottom">
+            <strong>👥 Capacidad máxima:</strong>
+            <span>5 personas</span>
+          </div>
+
+          <div class="spec-row d-flex justify-content-between py-3 border-bottom">
+            <strong>🛏️ Habitaciones:</strong>
+            <span>2 (1 matrimoniales, 1 individual + Litera)</span>
+          </div>
+
+          <div class="spec-row d-flex justify-content-between py-3 border-bottom">
+            <strong>🚿 Baños:</strong>
+            <span>1 completo</span>
+          </div>
+
+          <div class="spec-row d-flex justify-content-between py-3 border-bottom">
+            <strong>📐 Superficie:</strong>
+            <span>50 m2</span>
+          </div>
+
+          <div class="spec-row d-flex justify-content-between py-3 border-bottom">
+            <strong>🕐 Check-in:</strong>
+            <span>a partir de las 15:00 hrs</span>
+          </div>
+
+          <div class="spec-row d-flex justify-content-between py-3">
+            <strong>🕐 Check-out:</strong>
+            <span>hasta las 11:00 hrs</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Photo Gallery Section -->
+<section class="py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5">
+        <h2 class="display-6 fw-bold">📸 Galería de Fotos</h2>
+        <p class="lead">Explora cada rincón de nuestra acogedora cabaña</p>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="gallery-item position-relative overflow-hidden rounded-3">
+          <img class="img-fluid gallery-img" src="https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg" alt="Sala de estar">
+          <div class="gallery-overlay">
+            <h5>🛋️ Sala de Estar</h5>
+            <p>Espacio acogedor con chimenea y vista al bosque</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="gallery-item position-relative overflow-hidden rounded-3">
+          <img class="img-fluid gallery-img" src="https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg" alt="Cocina equipada">
+          <div class="gallery-overlay">
+            <h5>🍽️ Cocina Equipada</h5>
+            <p>Electrodomésticos modernos y utensilios completos</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="gallery-item position-relative overflow-hidden rounded-3">
+          <img class="img-fluid gallery-img" src="https://images.pexels.com/photos/1438832/pexels-photo-1438832.jpeg" alt="Habitación principal">
+          <div class="gallery-overlay">
+            <h5>🛏️ Habitación Principal</h5>
+            <p>Cama matrimonial con ropa de cama</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="gallery-item position-relative overflow-hidden rounded-3">
+          <img class="img-fluid gallery-img" src="https://images.pexels.com/photos/1579253/pexels-photo-1579253.jpeg" alt="Vista exterior">
+          <div class="gallery-overlay">
+            <h5>🌲 Vista Exterior</h5>
+            <p>Arquitectura rústica integrada al paisaje</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="gallery-item position-relative overflow-hidden rounded-3">
+          <img class="img-fluid gallery-img" src="https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg" alt="Terraza">
+          <div class="gallery-overlay">
+            <h5>🌅 Terraza</h5>
+            <p>Espacio perfecto para relajarse y disfrutar la naturaleza</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="gallery-item position-relative overflow-hidden rounded-3">
+          <img class="img-fluid gallery-img" src="https://images.pexels.com/photos/1438832/pexels-photo-1438832.jpeg" alt="Área de parrilla">
+          <div class="gallery-overlay">
+            <h5>🔥 Área de Parrilla</h5>
+            <p>Zona de asados con mesa y bancos de madera</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Location & Activities Section -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5">
+        <h2 class="display-6 fw-bold text-section-title">🗺️ Ubicación y Actividades</h2>
+        <p class="lead text-section-lead">Pino Huacho ofrece múltiples atractivos naturales y experiencias únicas</p>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="activity-card text-center p-4 h-100">
+          🥾
+          <h5 class="mt-3 fw-bold text-activity-title">Senderismo</h5>
+          <p class="text-muted text-activity-desc">Rutas de diferentes niveles por bosques nativos con flora y fauna única</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="activity-card text-center p-4 h-100">
+          📸
+          <h5 class="mt-3 fw-bold text-activity-title">Fotografía</h5>
+          <p class="text-muted text-activity-desc">Paisajes únicos ideales para capturar la belleza de la Araucanía</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="activity-card text-center p-4 h-100">
+          🎣
+          <h5 class="mt-3 fw-bold text-activity-title">Pesca Deportiva</h5>
+          <p class="text-muted text-activity-desc">Lagos y ríos cercanos con truchas y especies nativas</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="activity-card text-center p-4 h-100">
+          🍃
+          <h5 class="mt-3 fw-bold text-activity-title">Observación Natural</h5>
+          <p class="text-muted text-activity-desc">Flora y fauna nativa, aves endémicas y paisajes volcánicos</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Nearby Attractions -->
+<section class="py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5">
+        <h2 class="display-6 fw-bold">🏔️ Atractivos Cercanos</h2>
+        <p class="lead">Descubre los lugares más visitados cerca de Lican Ray y Coñaripe</p>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4 text-center">
+            🏞️
+            <h5 class="mt-3 fw-bold">Lago Calafquén</h5>
+            <p class="text-muted">Uno de los lagos más visitados de la zona, ideal para deportes náuticos y playas familiares</p>
+            <div class="small text-muted">📍 Lican Ray</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4 text-center">
+            🌋
+            <h5 class="mt-3 fw-bold">Termas Geométricas</h5>
+            <p class="text-muted">Famosas termas con arquitectura única y piscinas termales rodeadas de naturaleza</p>
+            <div class="small text-muted">📍 Coñaripe</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4 text-center">
+            🌲
+            <h5 class="mt-3 fw-bold">Parque Nacional Villarrica</h5>
+            <p class="text-muted">Senderos, volcanes y bosques nativos. Uno de los parques más visitados del sur de Chile</p>
+            <div class="small text-muted">📍 Cercano a Coñaripe y Lican Ray</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing Section -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 mx-auto text-center">
+        <h2 class="display-6 fw-bold mb-4">Condiciones</h2>
+
+        <div class="pricing-info p-4 rounded mb-4">
+          <div class="row g-3 text-start">
+            <div class="col-md-6">
+              <h6 class="fw-bold">✅ Incluido:</h6>
+              <ul class="list-unstyled small">
+                <li>• Ropa de cama</li>
+                <li>• Wi-Fi gratuito</li>
+                <li>• Estacionamiento</li>
+                <li>• Uso de parrilla</li>
+                <li>• Calefacción a leña</li>
+              </ul>
+            </div>
+
+            <div class="col-md-6">
+              <h6 class="fw-bold">ℹ️ Políticas:</h6>
+              <ul class="list-unstyled small">
+                <li>• Check-in: 15:00 hrs</li>
+                <li>• Check-out: 11:00 hrs</li>
+                <li>• No se permiten mascotas</li>
+                <li>• No fumar en interiores</li>
+                <li>• Máximo 6 personas</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+  <div class="container text-center">
+    <h2 class="display-6 fw-bold mb-4">🌟 ¿Te Gusta lo que Ves?</h2>
+    <p class="lead mb-4">Reserva ahora y vive una experiencia inolvidable en nuestra cabaña rodeada de naturaleza</p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <a class="btn btn-warning btn-lg" href="/reservar">📅 Reservar Ahora</a>
+      <a class="btn btn-outline-light btn-lg" href="/">🏠 Volver al Inicio</a>
+    </div>
+  </div>
+</section>

@@ -40,6 +40,7 @@ exports.dashboard = async (req, res) => {
     };
 
     res.render('admin/dashboard', {
+      layout: 'admin/layout',
       title: 'Panel de Administración',
       user: req.session.user,
       recentReservations: recentReservations.map(r => ({
@@ -77,6 +78,7 @@ exports.reservations = async (req, res) => {
     const totalPages = Math.ceil(count / limit);
 
     res.render('admin/reservations', {
+      layout: 'admin/layout',
       title: 'Gestión de Reservas',
       user: req.session.user,
       reservations: reservations.map(r => ({
@@ -129,6 +131,7 @@ exports.calendar = async (req, res) => {
     const currentMonth = moment().format('YYYY-MM');
     
     res.render('admin/calendar', {
+      layout: 'admin/layout',
       title: 'Calendario de Disponibilidad',
       user: req.session.user,
       currentMonth

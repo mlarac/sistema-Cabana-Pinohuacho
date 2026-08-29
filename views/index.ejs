@@ -1,0 +1,372 @@
+<% extraStyles = '<link rel="stylesheet" href="/css/index.css">' %>
+<% extraScripts = '<script src="/js/index.js"></script>' %>
+
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="hero-overlay"></div>
+  <div class="container h-100">
+    <div class="row h-100 align-items-center">
+      <div class="col-lg-8">
+        <div class="hero-content text-white">
+          <h1 class="display-4 fw-bold mb-4">
+            🌲 Descanso Natural en el Corazón de la Araucanía
+          </h1>
+          <p class="lead mb-4">Escapa de la rutina y conecta con la naturaleza en nuestra acogedora cabaña ubicada en Pino Huacho. Un refugio perfecto para relajarse y disfrutar de paisajes únicos rodeados de bosques nativos y lagos cristalinos.</p>
+          <div class="hero-buttons">
+            <a class="btn btn-warning btn-lg me-3" href="/reservar">
+              📅 Reservar Ahora
+            </a>
+            <a class="btn btn-outline-light btn-lg" href="/caracteristicas">
+              🏠 Ver Características
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Info Section -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row text-center g-4">
+      <div class="col-md-3">
+        <div class="feature-card p-4 h-100">
+          <div class="feature-icon mb-3">👥</div>
+          <h5 class="fw-bold">Hasta 5 personas</h5>
+          <p class="text-muted">Espaciosa y cómoda para grupos familiares y amigos</p>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="feature-card p-4 h-100">
+          <div class="feature-icon mb-3">🛏️</div>
+          <h5 class="fw-bold">2 Habitaciones</h5>
+          <p class="text-muted">Dormitorios acogedores con ropa de cama incluida</p>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="feature-card p-4 h-100">
+          <div class="feature-icon mb-3">🔥</div>
+          <h5 class="fw-bold">Calefacción a leña</h5>
+          <p class="text-muted">Ambiente cálido y acogedor durante todo el año</p>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="feature-card p-4 h-100">
+          <div class="feature-icon mb-3">🌲</div>
+          <h5 class="fw-bold">Entorno natural</h5>
+          <p class="text-muted">Rodeada de bosques nativos y senderos para explorar</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Availability Calendar Section -->
+<section class="py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5">
+        <h2 class="display-5 fw-bold">📅 Disponibilidad en Tiempo Real</h2>
+        <p class="lead">Consulta las fechas disponibles y planifica tu estadía perfecta</p>
+      </div>
+    </div>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="card shadow-lg border-0">
+          <div class="card-header text-white text-center py-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <button class="btn btn-outline-light" onclick="changeMonth(-1)">← Anterior</button>
+              <h4 class="mb-0" id="calendar-title">📅 Cargando...</h4>
+              <button class="btn btn-outline-light" onclick="changeMonth(1)">Siguiente →</button>
+            </div>
+          </div>
+
+          <div class="card-body p-4">
+            <!-- Calendar Legend -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <div class="d-flex justify-content-center flex-wrap gap-4">
+                  <div class="legend-item d-flex align-items-center">
+                    <div class="legend-color available me-2"></div>
+                    <span>🟢 Disponible</span>
+                  </div>
+                  <div class="legend-item d-flex align-items-center">
+                    <div class="legend-color occupied me-2"></div>
+                    <span>🔴 Ocupado</span>
+                  </div>
+                  <div class="legend-item d-flex align-items-center">
+                    <div class="legend-color maintenance me-2"></div>
+                    <span>🟡 Mantenimiento</span>
+                  </div>
+                  <div class="legend-item d-flex align-items-center">
+                    <div class="legend-color selected me-2"></div>
+                    <span>🔵 Seleccionado</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Calendar Container -->
+            <div id="availability-calendar" class="calendar-grid">
+              <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Cargando calendario...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Selected Dates Info -->
+            <div id="selected-dates-info" class="mt-4" style="display: none;">
+              <div class="alert alert-info">
+                <h6 class="fw-bold mb-2">📋 Fechas Seleccionadas</h6>
+                <div class="row">
+                  <div class="col-md-4">
+                    <strong>📅 Entrada: </strong>
+                    <span id="selected-checkin">-</span>
+                  </div>
+                  <div class="col-md-4">
+                    <strong>📅 Salida: </strong>
+                    <span id="selected-checkout">-</span>
+                  </div>
+                  <div class="col-md-4">
+                    <strong>🌙 Noches: </strong>
+                    <span id="selected-nights">-</span>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <strong>💰 Precio estimado: </strong>
+                  <span id="estimated-price">$0 CLP</span>
+                </div>
+                <div class="mt-3 text-center">
+                  <a class="btn btn-success btn-lg" href="/reservar" id="reserve-btn">
+                    ✅ Reservar estas fechas
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Gallery Preview Section -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5">
+        <h2 class="display-5 fw-bold">🏞️ Un Lugar Único para Descansar</h2>
+        <p class="lead">Descubre la belleza natural de la Araucanía desde nuestra cabaña</p>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="gallery-item position-relative overflow-hidden rounded-3">
+          <img class="img-fluid gallery-img" src="./img/balcon.jpg" alt="Interior acogedor de la cabaña">
+          <div class="gallery-overlay">
+            <h5>🏠 Interior Acogedor</h5>
+            <p>Espacios cálidos y confortables con decoración rústica</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="gallery-item position-relative overflow-hidden rounded-3">
+          <img class="img-fluid gallery-img" src="./img/portada.jpg" alt="Vista exterior de la cabaña">
+          <div class="gallery-overlay">
+            <h5>🌲 Arquitectura Natural</h5>
+            <p>Perfecta integración con el entorno boscoso</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="gallery-item position-relative overflow-hidden rounded-3">
+          <img class="img-fluid gallery-img" src="./img/comedor.png" alt="Cocina equipada">
+          <div class="gallery-overlay">
+            <h5>🍽️ Cocina Completamente Equipada</h5>
+            <p>Todo lo necesario para preparar deliciosas comidas</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="gallery-item position-relative overflow-hidden rounded-3">
+          <img class="img-fluid gallery-img" src="./img/paisaje.png" alt="Paisaje natural circundante">
+          <div class="gallery-overlay">
+            <h5>🏔️ Paisajes Únicos</h5>
+            <p>Naturaleza virgen y vistas panorámicas a tu alrededor</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Google Maps Section -->
+<section class="py-5 bg-white">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5">
+        <h2 class="display-6 fw-bold">📍 ¿Dónde estamos?</h2>
+        <p class="lead">Encuentra nuestra cabaña en el corazón de la Araucanía</p>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-lg-10 text-center">
+        <img class="img-fluid rounded-3 shadow" src="./img/mapa.png" alt="Ubicación de la cabaña en el mapa">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Highlight -->
+<section class="py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5">
+        <h2 class="display-6 fw-bold">✨ Comodidades Premium</h2>
+        <p class="lead">Todo lo que necesitas para una estadía perfecta</p>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="feature-card text-center p-4 h-100">
+          <div class="feature-icon mb-3">📶</div>
+          <h5 class="fw-bold">Wi-Fi Gratuito</h5>
+          <p class="text-muted">Internet de alta velocidad para mantenerte conectado</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="feature-card text-center p-4 h-100">
+          <div class="feature-icon mb-3">🚗</div>
+          <h5 class="fw-bold">Estacionamiento</h5>
+          <p class="text-muted">Espacio privado y seguro para tu vehículo</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="feature-card text-center p-4 h-100">
+          <div class="feature-icon mb-3">🔥</div>
+          <h5 class="fw-bold">Parrilla</h5>
+          <p class="text-muted">Disfruta de asados al aire libre con vista al bosque</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Activities Section -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5">
+        <h2 class="display-6 fw-bold">🎯 Actividades y Experiencias</h2>
+        <p class="lead">Descubre todo lo que puedes hacer en Pino Huacho</p>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="activity-card text-center p-4 h-100">
+          🥾
+          <h5 class="mt-3 fw-bold">Senderismo</h5>
+          <p class="text-muted">Rutas de diferentes niveles por bosques nativos</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="activity-card text-center p-4 h-100">
+          📸
+          <h5 class="mt-3 fw-bold">Fotografía</h5>
+          <p class="text-muted">Paisajes únicos ideales para capturar momentos</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="activity-card text-center p-4 h-100">
+          🎣
+          <h5 class="mt-3 fw-bold">Pesca</h5>
+          <p class="text-muted">Lagos y ríos cercanos para la pesca deportiva</p>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <div class="activity-card text-center p-4 h-100">
+          🍃
+          <h5 class="mt-3 fw-bold">Observación</h5>
+          <p class="text-muted">Flora y fauna nativa de la Araucanía</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5">
+        <h2 class="display-6 fw-bold">💬 Lo que dicen nuestros huéspedes</h2>
+        <p class="lead">Experiencias reales de quienes nos han visitado</p>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4 text-center">
+            ⭐⭐⭐⭐⭐
+            <p class="mt-3 mb-3">"Una experiencia increíble. La cabaña es exactamente como se ve en las fotos, muy acogedora y con todas las comodidades."</p>
+            <strong>- María González</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4 text-center">
+            ⭐⭐⭐⭐⭐
+            <p class="mt-3 mb-3">"El lugar perfecto para desconectarse. Los paisajes son espectaculares y la atención es excelente."</p>
+            <strong>- Carlos Mendoza</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4 text-center">
+            ⭐⭐⭐⭐⭐
+            <p class="mt-3 mb-3">"Ideal para ir en familia. Los niños disfrutaron mucho y nosotros pudimos relajarnos completamente."</p>
+            <strong>- Ana Rodríguez</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+  <div class="container text-center">
+    <div class="row">
+      <div class="col-lg-8 mx-auto">
+        <h2 class="display-5 fw-bold mb-4">🌟 ¿Listo para una Experiencia Única?</h2>
+        <p class="lead mb-4">Reserva ahora y asegura tu lugar en este paraíso natural. Disponibilidad limitada durante temporada alta.</p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+          <a class="btn btn-warning btn-lg" href="/reservar">📅 Hacer Reserva</a>
+          <a class="btn btn-outline-light btn-lg" href="/caracteristicas">📋 Ver Detalles</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

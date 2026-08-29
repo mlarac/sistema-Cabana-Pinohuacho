@@ -1,4 +1,5 @@
 const express = require('express');
+const ejsLayouts = require('express-ejs-layouts');
 const session = require('express-session');
 const helmet = require('helmet');
 const compression = require('compression');
@@ -7,6 +8,8 @@ require('dotenv').config();
 
 const { sequelize } = require('./models');
 const routes = require('./routes');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,8 +34,10 @@ app.use(
 app.use(compression());
 
 // View engine setup
-app.set('view engine', 'pug');
+app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.use(ejsLayouts);
+app.set('layout', 'layout');
 
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
@@ -51,6 +56,9 @@ app.use(session({
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
+
+// Swagger UI Route
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes
 app.use('/', routes);
