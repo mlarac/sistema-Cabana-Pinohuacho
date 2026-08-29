@@ -1,4 +1,5 @@
 const { Reservation, Availability, User } = require('../models');
+const { Op } = require('sequelize');
 const moment = require('moment');
 const { body, validationResult } = require('express-validator');
 
@@ -11,7 +12,7 @@ exports.dashboard = async (req, res) => {
     const recentReservations = await Reservation.findAll({
       where: {
         checkIn: {
-          [require('sequelize').Op.between]: [today.toDate(), nextWeek.toDate()]
+          [Op.between]: [today.toDate(), nextWeek.toDate()]
         }
       },
       order: [['checkIn', 'ASC']],
@@ -25,14 +26,14 @@ exports.dashboard = async (req, res) => {
       thisMonthReservations: await Reservation.count({
         where: {
           createdAt: {
-            [require('sequelize').Op.gte]: moment().startOf('month').toDate()
+            [Op.gte]: moment().startOf('month').toDate()
           }
         }
       }),
       thisMonthRevenue: await Reservation.sum('totalPrice', {
         where: {
           createdAt: {
-            [require('sequelize').Op.gte]: moment().startOf('month').toDate()
+            [Op.gte]: moment().startOf('month').toDate()
           },
           status: 'confirmed'
         }
@@ -157,12 +158,25 @@ exports.updateAvailability = [
       }
 
       const { date, status, notes } = req.body;
+      const targetDate = moment(date).toDate();
 
-      await Availability.upsert({
-        date: moment(date).toDate(),
-        status,
-        notes: notes || null
+      const [record, created] = await Availability.findOrCreate({
+        where: { date: targetDate },
+        defaults: {
+          date: targetDate,
+          status,
+          price: 50000,
+          priceCategory: 'normal',
+          notes: notes || null
+        }
       });
+
+      if (!created) {
+        await record.update({
+          status,
+          ...(notes !== undefined ? { notes: notes || null } : {})
+        });
+      }
 
       res.json({ success: true, message: 'Disponibilidad actualizada' });
     } catch (error) {
@@ -173,19 +187,25 @@ exports.updateAvailability = [
 ];
 
 async function freeUpDates(checkIn, checkOut) {
-  const dates = [];
   let current = checkIn.clone();
   
   while (current.isBefore(checkOut)) {
-    dates.push(current.toDate());
-    current.add(1, 'day');
-  }
-
-  for (const date of dates) {
-    await Availability.upsert({
-      date,
-      status: 'available'
+    const date = current.toDate();
+    const [record, created] = await Availability.findOrCreate({
+      where: { date },
+      defaults: {
+        date,
+        status: 'available',
+        price: 50000,
+        priceCategory: 'normal'
+      }
     });
+
+    if (!created && record.status !== 'available') {
+      await record.update({ status: 'available' });
+    }
+
+    current.add(1, 'day');
   }
 }
 

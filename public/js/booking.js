@@ -57,13 +57,30 @@ class BookingForm {
 
   async loadCalendarAvailability(startDate, endDate) {
     try {
-      const year = startDate.getFullYear();
-      const month = startDate.getMonth() + 1;
+      const allAvailability = {};
+      const startYear = startDate.getUTCFullYear();
+      const startMonth = startDate.getUTCMonth();
+      const endYear = endDate.getUTCFullYear();
+      const endMonth = endDate.getUTCMonth();
 
-      const response = await fetch(`/api/availability/${year}/${month.toString().padStart(2, '0')}`);
-      const data = await response.json();
-      
-      this.displayCalendar(data, startDate, endDate);
+      let curYear = startYear;
+      let curMonth = startMonth;
+
+      while (curYear < endYear || (curYear === endYear && curMonth <= endMonth)) {
+        const monthStr = (curMonth + 1).toString().padStart(2, '0');
+        const response = await fetch(`/api/availability/${curYear}/${monthStr}`);
+        if (response.ok) {
+          const data = await response.json();
+          Object.assign(allAvailability, data);
+        }
+        curMonth++;
+        if (curMonth > 11) {
+          curMonth = 0;
+          curYear++;
+        }
+      }
+
+      this.displayCalendar(allAvailability, startDate, endDate);
     } catch (error) {
       console.error('Error loading availability:', error);
     }
@@ -73,7 +90,7 @@ class BookingForm {
     const calendarContainer = document.getElementById('calendar-preview');
     
     let conflictFound = false;
-    const current = new Date(selectedStart);
+    const current = new Date(selectedStart.getTime());
     
     while (current < selectedEnd) {
       const dateStr = current.toISOString().split('T')[0];
@@ -81,7 +98,7 @@ class BookingForm {
         conflictFound = true;
         break;
       }
-      current.setDate(current.getDate() + 1);
+      current.setUTCDate(current.getUTCDate() + 1);
     }
 
     let html = '';

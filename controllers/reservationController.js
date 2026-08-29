@@ -1,5 +1,6 @@
 const { Reservation, Availability } = require('../models');
 const { body, validationResult } = require('express-validator');
+const { Op } = require('sequelize');
 const moment = require('moment');
 const nodemailer = require('nodemailer');
 
@@ -74,45 +75,63 @@ exports.createReservation = [
 
   async (req, res) => {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
+      const { guestName, guestEmail, guestPhone, checkIn, checkOut, guests, notes } = req.body;
+      
+      const renderWithErrors = async (errorsList) => {
+        let pricePerNight = 50000;
+        let totalPrice = 0;
+        let nights = 0;
+        if (checkIn && checkOut) {
+          const start = moment(checkIn);
+          const end = moment(checkOut);
+          if (start.isValid() && end.isValid() && end.isAfter(start)) {
+            nights = end.diff(start, 'days');
+            let current = start.clone();
+            while (current.isBefore(end)) {
+              const dayRecord = await Availability.findOne({
+                where: { date: current.toDate() }
+              });
+              totalPrice += dayRecord && dayRecord.price ? parseFloat(dayRecord.price) : 50000;
+              current.add(1, 'day');
+            }
+            pricePerNight = nights > 0 ? totalPrice / nights : 50000;
+          }
+        }
         return res.render('booking', {
           title: 'Reservar Cabaña - Pino Huacho',
-          errors: errors.array(),
-          formData: req.body
+          errors: errorsList,
+          formData: req.body,
+          prefilledData: {
+            checkIn: checkIn || '',
+            checkOut: checkOut || '',
+            pricePerNight,
+            totalPrice,
+            nights
+          }
         });
-      }
+      };
 
-      const { guestName, guestEmail, guestPhone, checkIn, checkOut, guests, notes } = req.body;
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return renderWithErrors(errors.array());
+      }
       
       // Validate dates
       const checkInDate = moment(checkIn);
       const checkOutDate = moment(checkOut);
       
       if (checkInDate.isBefore(moment(), 'day')) {
-        return res.render('booking', {
-          title: 'Reservar Cabaña - Pino Huacho',
-          errors: [{ msg: 'La fecha de entrada no puede ser anterior a hoy' }],
-          formData: req.body
-        });
+        return renderWithErrors([{ msg: 'La fecha de entrada no puede ser anterior a hoy' }]);
       }
 
       if (checkOutDate.isSameOrBefore(checkInDate)) {
-        return res.render('booking', {
-          title: 'Reservar Cabaña - Pino Huacho',
-          errors: [{ msg: 'La fecha de salida debe ser posterior a la fecha de entrada' }],
-          formData: req.body
-        });
+        return renderWithErrors([{ msg: 'La fecha de salida debe ser posterior a la fecha de entrada' }]);
       }
 
       // Check availability
       const isAvailable = await checkDateAvailability(checkInDate, checkOutDate);
       if (!isAvailable) {
-        return res.render('booking', {
-          title: 'Reservar Cabaña - Pino Huacho',
-          errors: [{ msg: 'Las fechas seleccionadas no están disponibles' }],
-          formData: req.body
-        });
+        return renderWithErrors([{ msg: 'Las fechas seleccionadas no están disponibles' }]);
       }
 
       // Calculate total price dynamically from database
@@ -175,10 +194,10 @@ exports.getAvailability = async (req, res) => {
     const reservations = await Reservation.findAll({
       where: {
         checkOut: {
-          [require('sequelize').Op.gte]: startDate.toDate()
+          [Op.gt]: startDate.toDate()
         },
         checkIn: {
-          [require('sequelize').Op.lte]: endDate.toDate()
+          [Op.lte]: endDate.toDate()
         },
         status: ['confirmed', 'pending']
       }
@@ -188,7 +207,7 @@ exports.getAvailability = async (req, res) => {
     const availability = await Availability.findAll({
       where: {
         date: {
-          [require('sequelize').Op.between]: [startDate.toDate(), endDate.toDate()]
+          [Op.between]: [startDate.toDate(), endDate.toDate()]
         }
       }
     });
@@ -201,7 +220,13 @@ exports.getAvailability = async (req, res) => {
       const dateStr = current.format('YYYY-MM-DD');
       calendar[dateStr] = 'available';
       
-      // Check if date is in a reservation
+      // Check manual availability settings first
+      const manualSetting = availability.find(a => moment(a.date).isSame(current, 'day'));
+      if (manualSetting) {
+        calendar[dateStr] = manualSetting.status;
+      }
+
+      // Check if date is in an active reservation (takes highest precedence)
       for (const reservation of reservations) {
         const resCheckIn = moment(reservation.checkIn);
         const resCheckOut = moment(reservation.checkOut);
@@ -210,12 +235,6 @@ exports.getAvailability = async (req, res) => {
           calendar[dateStr] = 'occupied';
           break;
         }
-      }
-      
-      // Check manual availability settings
-      const manualSetting = availability.find(a => moment(a.date).isSame(current, 'day'));
-      if (manualSetting) {
-        calendar[dateStr] = manualSetting.status;
       }
       
       current.add(1, 'day');
@@ -229,55 +248,58 @@ exports.getAvailability = async (req, res) => {
 };
 
 async function checkDateAvailability(checkIn, checkOut) {
+  // Check overlapping reservations
   const reservations = await Reservation.findAll({
     where: {
-      [require('sequelize').Op.or]: [
-        {
-          checkIn: {
-            [require('sequelize').Op.between]: [checkIn.toDate(), checkOut.toDate()]
-          }
-        },
-        {
-          checkOut: {
-            [require('sequelize').Op.between]: [checkIn.toDate(), checkOut.toDate()]
-          }
-        },
-        {
-          [require('sequelize').Op.and]: [
-            {
-              checkIn: {
-                [require('sequelize').Op.lte]: checkIn.toDate()
-              }
-            },
-            {
-              checkOut: {
-                [require('sequelize').Op.gte]: checkOut.toDate()
-              }
-            }
-          ]
-        }
-      ],
+      checkIn: {
+        [Op.lt]: checkOut.toDate()
+      },
+      checkOut: {
+        [Op.gt]: checkIn.toDate()
+      },
       status: ['confirmed', 'pending']
     }
   });
 
-  return reservations.length === 0;
-}
+  if (reservations.length > 0) {
+    return false;
+  }
 
-async function markDatesAsOccupied(checkIn, checkOut) {
-  const dates = [];
+  // Check Availability table for maintenance or occupied status in the requested range
   let current = checkIn.clone();
-  
   while (current.isBefore(checkOut)) {
-    dates.push(current.toDate());
+    const dayRecord = await Availability.findOne({
+      where: { date: current.toDate() }
+    });
+    if (dayRecord && dayRecord.status !== 'available') {
+      return false;
+    }
     current.add(1, 'day');
   }
 
-  for (const date of dates) {
-    await Availability.upsert({
-      date,
-      status: 'occupied'
+  return true;
+}
+
+async function markDatesAsOccupied(checkIn, checkOut) {
+  let current = checkIn.clone();
+  
+  while (current.isBefore(checkOut)) {
+    const date = current.toDate();
+    const [record, created] = await Availability.findOrCreate({
+      where: { date },
+      defaults: {
+        date,
+        status: 'occupied',
+        price: 50000,
+        priceCategory: 'normal'
+      }
     });
+
+    if (!created && record.status !== 'occupied') {
+      await record.update({ status: 'occupied' });
+    }
+
+    current.add(1, 'day');
   }
 }
 

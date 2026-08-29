@@ -5,13 +5,28 @@ const { Op } = require('sequelize');
 exports.showPricesPage = async (req, res) => {
   try {
     // Obtener datos de disponibilidad para los próximos 3 meses
-    const startDate = moment().startOf('day').toDate();
-    const endDate = moment().add(3, 'months').endOf('day').toDate();
+    const startDate = moment().startOf('day');
+    const endDate = moment().add(3, 'months').endOf('day');
     
+    // Asegurar que existan registros básicos para el período
+    let current = startDate.clone();
+    while (current.isSameOrBefore(endDate)) {
+      await Availability.findOrCreate({
+        where: { date: current.toDate() },
+        defaults: {
+          date: current.toDate(),
+          status: 'available',
+          price: 50000,
+          priceCategory: 'normal'
+        }
+      });
+      current.add(1, 'day');
+    }
+
     const availabilityData = await Availability.findAll({
       where: {
         date: {
-          [Op.between]: [startDate, endDate]
+          [Op.between]: [startDate.toDate(), endDate.toDate()]
         }
       },
       order: [['date', 'ASC']]

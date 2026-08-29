@@ -44,6 +44,23 @@ module.exports = (sequelize, DataTypes) => {
       updateData.priceCategory = category;
     }
     
+    // Primero crear los registros que no existen en el rango
+    const current = new Date(startDate);
+    const end = new Date(endDate);
+    
+    while (current <= end) {
+      await this.findOrCreate({
+        where: { date: new Date(current) },
+        defaults: {
+          date: new Date(current),
+          status: 'available',
+          price: newPrice,
+          priceCategory: category || 'normal'
+        }
+      });
+      current.setDate(current.getDate() + 1);
+    }
+    
     return this.update(
       updateData,
       { 
