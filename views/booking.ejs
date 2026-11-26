@@ -101,26 +101,42 @@
                 <div class="row">
                   <div class="col-md-6 mb-3">
                     <label class="form-label" for="guestName">👤 Nombre Completo *</label>
+                    <span id="guestName-hint" class="field-hint">Ingresa tu nombre y apellido</span>
                     <input class="form-control" type="text" id="guestName" name="guestName"
-                      autocomplete="name"
+                      autocomplete="name" enterkeyhint="next" minlength="2" maxlength="150"
+                      aria-describedby="guestName-hint" data-error="guestName-error"
                       value="<%= (typeof formData !== 'undefined' && formData && formData.guestName) ? formData.guestName : '' %>" required>
+                    <div id="guestName-error" class="field-error-msg">
+                      <span role="img" aria-label="Error">❌</span> Ingresa un nombre de al menos 2 caracteres.
+                    </div>
                   </div>
 
                   <div class="col-md-6 mb-3">
                     <label class="form-label" for="guestEmail">✉️ Email *</label>
+                    <span id="guestEmail-hint" class="field-hint">Formato: nombre@ejemplo.cl</span>
                     <input class="form-control" type="email" id="guestEmail" name="guestEmail"
-                      autocomplete="email"
+                      autocomplete="email" spellcheck="false" enterkeyhint="next"
+                      aria-describedby="guestEmail-hint" data-error="guestEmail-error"
                       value="<%= (typeof formData !== 'undefined' && formData && formData.guestEmail) ? formData.guestEmail : '' %>" required>
+                    <div id="guestEmail-error" class="field-error-msg">
+                      <span role="img" aria-label="Error">❌</span> Ingresa un correo electrónico válido (ej. tu@correo.cl).
+                    </div>
                   </div>
                 </div>
 
                 <div class="row">
                   <div class="col-md-6 mb-3">
                     <label class="form-label" for="guestPhone">📞 Teléfono / WhatsApp *</label>
+                    <span id="guestPhone-hint" class="field-hint">Incluye código de país (ej. +56 9 1234 5678)</span>
                     <input class="form-control" type="tel" id="guestPhone" name="guestPhone"
-                      autocomplete="tel"
+                      autocomplete="tel" inputmode="tel" enterkeyhint="next"
+                      pattern="\+?[\d\s\-()]{8,20}"
+                      aria-describedby="guestPhone-hint" data-error="guestPhone-error"
                       value="<%= (typeof formData !== 'undefined' && formData && formData.guestPhone) ? formData.guestPhone : '' %>"
                       required placeholder="+56 9 1234 5678">
+                    <div id="guestPhone-error" class="field-error-msg">
+                      <span role="img" aria-label="Error">❌</span> Ingresa un número válido de 8 a 20 caracteres.
+                    </div>
                   </div>
                 </div>
 

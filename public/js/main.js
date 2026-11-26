@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeBootstrapComponents();
   setupSmoothScrolling();
   setupNavbarScrollEffect();
-  setupFormValidations();
+  setupAccessibleFormValidation();
   setupBackButtons();
 });
 
@@ -52,75 +52,124 @@ function setupBackButtons() {
   });
 }
 
-function setupFormValidations() {
-  document.querySelectorAll('.needs-validation').forEach((form) => {
-    form.addEventListener('submit', (event) => {
-      if (!form.checkValidity()) {
-        event.preventDefault();
-        event.stopPropagation();
+function setupAccessibleFormValidation() {
+  const fields = document.querySelectorAll('input[data-error], select[data-error], textarea[data-error]');
+  if (fields.length === 0) return;
+
+  const announcer = document.createElement('div');
+  announcer.setAttribute('aria-live', 'polite');
+  announcer.className = 'visually-hidden';
+  document.body.appendChild(announcer);
+
+  let announceTimer;
+  let announcedField;
+  const flagged = new WeakSet();
+  const announced = new WeakSet();
+
+  const linkError = (el, shown) => {
+    const errorId = el.dataset.error;
+    if (!errorId) return;
+    const ids = (el.getAttribute('aria-describedby') || '')
+      .split(/\s+/)
+      .filter((id) => id && id !== errorId);
+    if (shown) ids.push(errorId);
+    if (ids.length) el.setAttribute('aria-describedby', ids.join(' '));
+    else el.removeAttribute('aria-describedby');
+  };
+
+  const announceError = (el) => {
+    const errorEl = document.getElementById(el.dataset.error);
+    if (!errorEl) return;
+    const label = el.labels?.[0] ? `${el.labels[0].textContent.trim()}: ` : '';
+    clearTimeout(announceTimer);
+    announcer.textContent = '';
+    announcedField = el;
+    announceTimer = setTimeout(() => {
+      announcer.textContent = label + errorEl.textContent.replace(/\s+/g, ' ').trim();
+    }, 500);
+  };
+
+  const supportsUserInvalid = typeof CSS !== 'undefined' && CSS.supports('selector(:user-invalid)');
+  const dirtyState = new WeakMap();
+
+  const syncField = (el, shouldAnnounce = false) => {
+    if (!el || !el.matches?.('input[data-error], select[data-error], textarea[data-error]')) return;
+    let invalid = false;
+
+    if (supportsUserInvalid) {
+      invalid = el.matches(':user-invalid');
+    } else {
+      const state = dirtyState.get(el);
+      if (state && state.hasInteracted && state.hasBlurred) {
+        invalid = !el.validity.valid;
+        el.classList.toggle('user-invalid-fallback', invalid);
+        el.classList.toggle('user-valid-fallback', !invalid);
       }
-      form.classList.add('was-validated');
-    });
+    }
+
+    if (invalid) {
+      if (shouldAnnounce && !announced.has(el)) {
+        announceError(el);
+        announced.add(el);
+      }
+      el.setAttribute('aria-invalid', 'true');
+      linkError(el, true);
+      flagged.add(el);
+    } else if (flagged.has(el) || el.getAttribute('aria-invalid') !== 'true') {
+      el.setAttribute('aria-invalid', 'false');
+      linkError(el, false);
+      flagged.delete(el);
+      announced.delete(el);
+      if (announcedField === el) {
+        clearTimeout(announceTimer);
+        announcer.textContent = '';
+      }
+    }
+  };
+
+  fields.forEach((el) => el.setAttribute('aria-invalid', 'false'));
+
+  document.addEventListener(
+    'blur',
+    (e) => {
+      if (!supportsUserInvalid && e.target?.matches?.('[data-error]')) {
+        const st = dirtyState.get(e.target) || { hasInteracted: false, hasBlurred: false };
+        st.hasBlurred = true;
+        dirtyState.set(e.target, st);
+      }
+      syncField(e.target, true);
+    },
+    true
+  );
+
+  document.addEventListener('input', (e) => {
+    if (!supportsUserInvalid && e.target?.matches?.('[data-error]')) {
+      const st = dirtyState.get(e.target) || { hasInteracted: false, hasBlurred: false };
+      st.hasInteracted = true;
+      dirtyState.set(e.target, st);
+    }
+    if (e.target?.hasAttribute?.('aria-invalid')) {
+      syncField(e.target, false);
+    }
   });
 
-  document.querySelectorAll('input[type="email"]').forEach((input) => {
-    input.addEventListener('blur', validateEmail);
-    input.addEventListener('input', clearValidationState);
-  });
+  document.addEventListener(
+    'change',
+    (e) => syncField(e.target, true),
+    true
+  );
 
-  document.querySelectorAll('input[type="tel"]').forEach((input) => {
-    input.addEventListener('blur', validatePhone);
-    input.addEventListener('input', clearValidationState);
-  });
-}
-
-function validateEmail(event) {
-  const email = event.target.value.trim();
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  if (email && !emailPattern.test(email)) {
-    event.target.classList.add('is-invalid');
-    showFieldError(event.target, 'Por favor ingrese un email válido');
-  } else if (email) {
-    event.target.classList.remove('is-invalid');
-    event.target.classList.add('is-valid');
-    hideFieldError(event.target);
-  }
-}
-
-function validatePhone(event) {
-  const phone = event.target.value.trim();
-  // Acepta teléfonos chilenos e internacionales (ej. +56 9 1234 5678, +54 11..., 912345678)
-  const phonePattern = /^\+?[\d\s\-()]{8,20}$/;
-
-  if (phone && !phonePattern.test(phone)) {
-    event.target.classList.add('is-invalid');
-    showFieldError(event.target, 'Ingresa un teléfono válido (8 a 20 caracteres, ej. +56 9 1234 5678)');
-  } else if (phone) {
-    event.target.classList.remove('is-invalid');
-    event.target.classList.add('is-valid');
-    hideFieldError(event.target);
-  }
-}
-
-function clearValidationState(event) {
-  event.target.classList.remove('is-invalid', 'is-valid');
-  hideFieldError(event.target);
-}
-
-function showFieldError(field, message) {
-  let errorDiv = field.parentNode.querySelector('.invalid-feedback');
-  if (!errorDiv) {
-    errorDiv = document.createElement('div');
-    errorDiv.className = 'invalid-feedback';
-    field.parentNode.appendChild(errorDiv);
-  }
-  errorDiv.textContent = message;
-}
-
-function hideFieldError(field) {
-  const errorDiv = field.parentNode.querySelector('.invalid-feedback');
-  if (errorDiv) errorDiv.remove();
+  document.addEventListener(
+    'invalid',
+    (e) => {
+      if (!supportsUserInvalid && e.target?.matches?.('[data-error]')) {
+        dirtyState.set(e.target, { hasInteracted: true, hasBlurred: true });
+      }
+      announced.add(e.target);
+      syncField(e.target, false);
+    },
+    true
+  );
 }
 
 function showAlert(type, message, duration = 5000) {

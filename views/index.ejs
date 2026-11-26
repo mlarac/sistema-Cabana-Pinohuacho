@@ -1,8 +1,20 @@
-<% extraStyles = '<link rel="preload" as="image" href="/img/portada.webp" fetchpriority="high"><link rel="stylesheet" href="/css/index.css">' %>
+<% extraStyles = '<link rel="stylesheet" href="/css/index.css">' %>
 <% extraScripts = '<script src="/js/index.js"></script>' %>
 
 <!-- Hero Section -->
 <section class="hero-section">
+  <picture class="hero-bg-picture" aria-hidden="true">
+    <source srcset="/img/portada.webp" type="image/webp">
+    <img
+      class="hero-bg-img"
+      src="/img/portada.jpg"
+      alt=""
+      width="1600"
+      height="1067"
+      fetchpriority="high"
+      decoding="async"
+    >
+  </picture>
   <div class="hero-overlay"></div>
   <div class="container h-100">
     <div class="row h-100 align-items-center">
@@ -179,7 +191,7 @@
         <div class="gallery-item position-relative overflow-hidden rounded-3">
           <picture>
             <source srcset="<%= item.src %>" type="image/webp">
-            <img class="img-fluid gallery-img" src="<%= item.fallback %>" alt="<%= item.alt %>" loading="lazy" decoding="async">
+            <img class="img-fluid gallery-img" src="<%= item.fallback %>" alt="<%= item.alt %>" width="1200" height="800" loading="lazy" decoding="async">
           </picture>
           <div class="gallery-overlay">
             <h5><%= item.title %></h5>

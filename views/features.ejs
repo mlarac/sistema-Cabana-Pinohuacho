@@ -133,7 +133,7 @@
               aria-label="Ampliar foto: <%= photo.title %>">
               <picture>
                 <source srcset="<%= photo.src %>" type="image/webp">
-                <img class="img-fluid gallery-img" src="<%= photo.fallback %>" alt="<%= photo.alt %>" loading="lazy"
+                <img class="img-fluid gallery-img" src="<%= photo.fallback %>" alt="<%= photo.alt %>" width="1200" height="800" loading="lazy"
                   decoding="async">
               </picture>
               <div class="gallery-overlay">
@@ -152,14 +152,14 @@
   </section>
 
   <!-- Native Lightbox Dialog -->
-  <dialog id="gallery-lightbox" class="gallery-lightbox" aria-labelledby="lightbox-title">
+  <dialog id="gallery-lightbox" class="gallery-lightbox" closedby="any" aria-labelledby="lightbox-title">
     <div class="lightbox-content">
       <div class="lightbox-header d-flex justify-content-between align-items-center mb-2">
         <h5 id="lightbox-title" class="mb-0 text-white"></h5>
         <button type="button" class="btn btn-sm btn-light" id="lightbox-close" aria-label="Cerrar imagen">✕
           Cerrar</button>
       </div>
-      <img id="lightbox-img" src="" alt="" class="img-fluid rounded">
+      <img id="lightbox-img" src="" alt="" class="img-fluid rounded" fetchpriority="low">
       <p id="lightbox-desc" class="text-white-50 mt-2 mb-0 small"></p>
     </div>
   </dialog>
