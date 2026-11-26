@@ -1,4 +1,4 @@
-const { Op } = require('sequelize');
+const cabin = require('../config/cabin');
 
 module.exports = (sequelize, DataTypes) => {
   const Availability = sequelize.define('Availability', {
@@ -8,89 +8,41 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true
     },
     date: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
       unique: true
     },
     status: {
       type: DataTypes.ENUM('available', 'occupied', 'maintenance'),
+      allowNull: false,
       defaultValue: 'available'
     },
     price: {
       type: DataTypes.DECIMAL(10, 2),
-      defaultValue: 50000 // Default price in CLP
+      allowNull: false,
+      defaultValue: cabin.defaultPrice
     },
     priceCategory: {
       type: DataTypes.ENUM('normal', 'weekend', 'high_season', 'holiday', 'special'),
+      allowNull: false,
       defaultValue: 'normal'
     },
     notes: {
-      type: DataTypes.TEXT
+      type: DataTypes.TEXT,
+      allowNull: true
     }
+  }, {
+    indexes: [
+      {
+        name: 'idx_availabilities_category',
+        fields: ['priceCategory']
+      },
+      {
+        name: 'idx_availabilities_status',
+        fields: ['status']
+      }
+    ]
   });
-
-  // Método estático para actualizar precios por categoría
-  Availability.updatePricesByCategory = async function(category, newPrice) {
-    return this.update(
-      { price: newPrice },
-      { where: { priceCategory: category } }
-    );
-  };
-
-  // Método estático para actualizar precios por rango de fechas
-  Availability.updatePricesByDateRange = async function(startDate, endDate, newPrice, category = null) {
-    const updateData = { price: newPrice };
-    if (category) {
-      updateData.priceCategory = category;
-    }
-    
-    return this.update(
-      updateData,
-      { 
-        where: {
-          date: {
-            [Op.between]: [startDate, endDate]
-          }
-        }
-      }
-    );
-  };
-
-  // Método estático para actualizar disponibilidad por rango de fechas
-  Availability.updateAvailabilityByDateRange = async function(startDate, endDate, status, notes = null) {
-    const updateData = { status };
-    if (notes) {
-      updateData.notes = notes;
-    }
-    
-    // Primero crear los registros que no existen en el rango
-    const current = new Date(startDate);
-    const end = new Date(endDate);
-    
-    while (current <= end) {
-      await this.findOrCreate({
-        where: { date: new Date(current) },
-        defaults: {
-          date: new Date(current),
-          status: 'available',
-          price: 50000
-        }
-      });
-      current.setDate(current.getDate() + 1);
-    }
-    
-    // Luego actualizar todos los registros en el rango
-    return this.update(
-      updateData,
-      { 
-        where: {
-          date: {
-            [Op.between]: [startDate, endDate]
-          }
-        }
-      }
-    );
-  };
 
   return Availability;
 };

@@ -1,311 +1,358 @@
-// Admin Panel JavaScript
-document.addEventListener('DOMContentLoaded', function() {
-  initializeAdminComponents();
-  setupDataTables();
-  setupDatePickers();
-  setupConfirmationDialogs();
-});
+// Admin Panel Unified JavaScript (CSP-compliant, CSRF-protected)
+(() => {
+  const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
-function initializeAdminComponents() {
-  // Initialize any admin-specific components
-  setupActiveNavigation();
-  setupAutoRefresh();
-}
-
-function setupActiveNavigation() {
-  // Highlight active navigation item based on current URL
-  const currentPath = window.location.pathname;
-  const navLinks = document.querySelectorAll('.list-group-item-action');
-  
-  navLinks.forEach(link => {
-    if (link.getAttribute('href') === currentPath) {
-      link.classList.add('active');
-    } else {
-      link.classList.remove('active');
-    }
-  });
-}
-
-function setupDataTables() {
-  // Add sorting and filtering to tables
-  const tables = document.querySelectorAll('table');
-  tables.forEach(table => {
-    addTableSort(table);
-  });
-}
-
-function addTableSort(table) {
-  const headers = table.querySelectorAll('th');
-  headers.forEach((header, index) => {
-    if (!header.classList.contains('no-sort')) {
-      header.style.cursor = 'pointer';
-      header.addEventListener('click', () => sortTable(table, index));
-    }
-  });
-}
-
-function sortTable(table, columnIndex) {
-  const tbody = table.querySelector('tbody');
-  const rows = Array.from(tbody.querySelectorAll('tr'));
-  
-  const sortedRows = rows.sort((a, b) => {
-    const aText = a.cells[columnIndex].textContent.trim();
-    const bText = b.cells[columnIndex].textContent.trim();
-    
-    // Try to parse as numbers first
-    const aNum = parseFloat(aText.replace(/[^\d.-]/g, ''));
-    const bNum = parseFloat(bText.replace(/[^\d.-]/g, ''));
-    
-    if (!isNaN(aNum) && !isNaN(bNum)) {
-      return aNum - bNum;
-    }
-    
-    // Sort as strings
-    return aText.localeCompare(bText);
-  });
-  
-  tbody.innerHTML = '';
-  sortedRows.forEach(row => tbody.appendChild(row));
-}
-
-function setupDatePickers() {
-  // Enhance date inputs with better UX
-  const dateInputs = document.querySelectorAll('input[type="date"]');
-  dateInputs.forEach(input => {
-    // Set minimum date to today for future dates
-    if (input.classList.contains('future-only')) {
-      input.min = new Date().toISOString().split('T')[0];
-    }
-  });
-}
-
-function setupConfirmationDialogs() {
-  // Add confirmation for destructive actions
-  const deleteButtons = document.querySelectorAll('[data-confirm]');
-  deleteButtons.forEach(button => {
-    button.addEventListener('click', function(e) {
-      const message = this.getAttribute('data-confirm') || '¿Estás seguro?';
-      if (!confirm(message)) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    });
-  });
-}
-
-function setupAutoRefresh() {
-  // Auto-refresh dashboard every 5 minutes
-  if (window.location.pathname === '/admin') {
-    setInterval(() => {
-      // Only refresh if the page is visible
-      if (!document.hidden) {
-        refreshDashboardStats();
-      }
-    }, 300000); // 5 minutes
-  }
-}
-
-function refreshDashboardStats() {
-  // Refresh dashboard statistics without full page reload
-  fetch('/admin/api/stats')
-    .then(response => response.json())
-    .then(data => {
-      updateStatCards(data);
-    })
-    .catch(error => {
-      console.error('Error refreshing stats:', error);
-    });
-}
-
-function updateStatCards(stats) {
-  // Update statistic cards with new data
-  const statElements = {
-    totalReservations: document.querySelector('[data-stat="total-reservations"]'),
-    pendingReservations: document.querySelector('[data-stat="pending-reservations"]'),
-    thisMonthReservations: document.querySelector('[data-stat="this-month-reservations"]'),
-    thisMonthRevenue: document.querySelector('[data-stat="this-month-revenue"]')
-  };
-
-  Object.keys(statElements).forEach(key => {
-    const element = statElements[key];
-    if (element && stats[key] !== undefined) {
-      element.textContent = stats[key];
-    }
-  });
-}
-
-// Calendar functions
-function initializeCalendar() {
-  const calendarContainer = document.getElementById('calendar-container');
-  if (!calendarContainer) return;
-
-  loadCalendarData();
-}
-
-function loadCalendarData() {
-  const currentMonth = new Date().getMonth() + 1;
-  const currentYear = new Date().getFullYear();
-  
-  fetch(`/admin/api/calendar/${currentYear}/${currentMonth}`)
-    .then(response => response.json())
-    .then(data => {
-      renderCalendar(data);
-    })
-    .catch(error => {
-      console.error('Error loading calendar:', error);
-      showAlert('danger', 'Error al cargar el calendario');
-    });
-}
-
-function renderCalendar(data) {
-  // Calendar rendering logic would go here
-  // This is handled in the specific calendar page
-}
-
-// Reservation management
-function cancelReservation(reservationId) {
-  if (!confirm('¿Estás seguro de que quieres cancelar esta reserva?')) {
-    return;
+  function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
   }
 
-  const button = document.querySelector(`[onclick="cancelReservation(${reservationId})"]`);
-  const originalText = button.innerHTML;
-  
-  // Show loading state
-  button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Cancelando...';
-  button.disabled = true;
-
-  fetch(`/admin/reservas/${reservationId}/cancel`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      // Update the row to show cancelled status
-      updateReservationRow(reservationId, 'cancelled');
-      showAlert('success', data.message);
-    } else {
-      showAlert('danger', data.error || 'Error al cancelar la reserva');
-      // Restore button
-      button.innerHTML = originalText;
-      button.disabled = false;
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    showAlert('danger', 'Error de conexión');
-    // Restore button
-    button.innerHTML = originalText;
-    button.disabled = false;
-  });
-}
-
-function updateReservationRow(reservationId, status) {
-  const row = document.getElementById(`reservation-${reservationId}`);
-  if (row) {
-    const statusCell = row.querySelector('td:nth-child(6)'); // Adjust based on table structure
-    const actionCell = row.querySelector('td:nth-child(8)');
-    
-    if (statusCell) {
-      statusCell.innerHTML = '<span class="badge bg-danger">Cancelada</span>';
-    }
-    
-    if (actionCell) {
-      actionCell.innerHTML = '<span class="text-muted">Cancelada</span>';
-    }
+  async function postJson(url, payload = {}) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'X-CSRF-Token': getCsrfToken()
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok, status: res.status, data };
   }
-}
 
-// Utility functions for admin
-function showAlert(type, message, duration = 5000) {
-  const alertContainer = document.getElementById('admin-alert-container') || createAdminAlertContainer();
-  
-  const alertDiv = document.createElement('div');
-  alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-  alertDiv.innerHTML = `
-    ${message}
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  `;
-  
-  alertContainer.appendChild(alertDiv);
-  
-  setTimeout(() => {
-    if (alertDiv.parentNode) {
-      alertDiv.remove();
-    }
-  }, duration);
-}
+  function showAlert(type, message, duration = 5000) {
+    const container =
+      document.getElementById('admin-alert-container') || createAlertContainer();
 
-function createAdminAlertContainer() {
-  const container = document.createElement('div');
-  container.id = 'admin-alert-container';
-  container.style.position = 'fixed';
-  container.style.top = '20px';
-  container.style.right = '20px';
-  container.style.zIndex = '9999';
-  container.style.maxWidth = '400px';
-  
-  const main = document.querySelector('main');
-  if (main) {
-    main.appendChild(container);
-  } else {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show shadow-sm`;
+    alertDiv.setAttribute('role', 'alert');
+
+    const msgSpan = document.createElement('span');
+    msgSpan.textContent = message;
+
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'btn-close';
+    closeBtn.setAttribute('data-bs-dismiss', 'alert');
+    closeBtn.setAttribute('aria-label', 'Cerrar');
+
+    alertDiv.appendChild(msgSpan);
+    alertDiv.appendChild(closeBtn);
+    container.appendChild(alertDiv);
+
+    setTimeout(() => {
+      if (alertDiv.parentNode) alertDiv.remove();
+    }, duration);
+  }
+
+  function createAlertContainer() {
+    const container = document.createElement('div');
+    container.id = 'admin-alert-container';
+    container.style.position = 'fixed';
+    container.style.top = '70px';
+    container.style.right = '20px';
+    container.style.zIndex = '9999';
+    container.style.maxWidth = '420px';
     document.body.appendChild(container);
+    return container;
   }
-  
-  return container;
-}
 
-function exportData(type) {
-  // Export functionality for reservations, etc.
-  const url = `/admin/export/${type}`;
-  window.open(url, '_blank');
-}
+  document.addEventListener('DOMContentLoaded', () => {
+    const pageEl = document.querySelector('[data-admin-page]');
+    const page = pageEl ? pageEl.dataset.adminPage : '';
 
-function printReport() {
-  window.print();
-}
-
-// Search and filter functions
-function setupSearch() {
-  const searchInput = document.getElementById('search-input');
-  if (searchInput) {
-    searchInput.addEventListener('input', debounce(performSearch, 300));
-  }
-}
-
-function performSearch(event) {
-  const query = event.target.value.toLowerCase();
-  const rows = document.querySelectorAll('tbody tr');
-  
-  rows.forEach(row => {
-    const text = row.textContent.toLowerCase();
-    if (text.includes(query)) {
-      row.style.display = '';
-    } else {
-      row.style.display = 'none';
-    }
+    if (page === 'dashboard') initDashboard();
+    if (page === 'reservations') initReservations();
+    if (page === 'calendar') initCalendar();
+    if (page === 'prices') initPrices();
   });
-}
 
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
+  // ============================================
+  // DASHBOARD
+  // ============================================
+  function initDashboard() {
+    setInterval(() => {
+      if (!document.hidden) refreshDashboardStats();
+    }, 300000);
+  }
+
+  async function refreshDashboardStats() {
+    try {
+      const res = await fetch('/admin/api/stats', {
+        headers: { Accept: 'application/json' }
+      });
+      if (!res.ok) return;
+      const stats = await res.json();
+      const map = {
+        totalReservations: '[data-stat="total-reservations"]',
+        pendingReservations: '[data-stat="pending-reservations"]',
+        thisMonthReservations: '[data-stat="this-month-reservations"]',
+        thisMonthRevenue: '[data-stat="this-month-revenue"]'
+      };
+      Object.entries(map).forEach(([key, selector]) => {
+        const el = document.querySelector(selector);
+        if (el && stats[key] !== undefined) {
+          el.textContent = stats[key];
+        }
+      });
+    } catch (err) {
+      console.error('Error refreshing stats:', err);
+    }
+  }
+
+  // ============================================
+  // RESERVATIONS
+  // ============================================
+  function initReservations() {
+    const editModalEl = document.getElementById('editReservationModal');
+    const editModal = editModalEl ? new bootstrap.Modal(editModalEl) : null;
+
+    document.addEventListener('click', async (e) => {
+      const confirmBtn = e.target.closest('[data-action="confirm-reservation"]');
+      if (confirmBtn) {
+        const id = confirmBtn.dataset.id;
+        if (!confirm('¿Confirmar esta reserva y enviar notificación al huésped?')) return;
+        confirmBtn.disabled = true;
+        const { ok, data } = await postJson(`/admin/reservas/${id}/confirm`);
+        if (ok && data.success) {
+          showAlert('success', data.message);
+          setTimeout(() => window.location.reload(), 600);
+        } else {
+          showAlert('danger', data.error || 'No se pudo confirmar la reserva');
+          confirmBtn.disabled = false;
+        }
+        return;
+      }
+
+      const cancelBtn = e.target.closest('[data-action="cancel-reservation"]');
+      if (cancelBtn) {
+        const id = cancelBtn.dataset.id;
+        if (!confirm('¿Estás seguro de cancelar esta reserva? Se liberarán sus fechas.')) return;
+        cancelBtn.disabled = true;
+        const { ok, data } = await postJson(`/admin/reservas/${id}/cancel`);
+        if (ok && data.success) {
+          showAlert('success', data.message);
+          setTimeout(() => window.location.reload(), 600);
+        } else {
+          showAlert('danger', data.error || 'No se pudo cancelar la reserva');
+          cancelBtn.disabled = false;
+        }
+        return;
+      }
+
+      const editBtn = e.target.closest('[data-action="edit-reservation"]');
+      if (editBtn && editModal) {
+        document.getElementById('editResId').value = editBtn.dataset.id || '';
+        document.getElementById('editResName').value = editBtn.dataset.name || '';
+        document.getElementById('editResEmail').value = editBtn.dataset.email || '';
+        document.getElementById('editResPhone').value = editBtn.dataset.phone || '';
+        document.getElementById('editResCheckIn').value = editBtn.dataset.checkin || '';
+        document.getElementById('editResCheckOut').value = editBtn.dataset.checkout || '';
+        document.getElementById('editResGuests').value = editBtn.dataset.guests || '1';
+        document.getElementById('editResStatus').value = editBtn.dataset.status || 'pending';
+        document.getElementById('editResTotal').value = editBtn.dataset.total || '';
+        document.getElementById('editResNotes').value = editBtn.dataset.notes || '';
+        editModal.show();
+      }
+    });
+
+    const manualForm = document.getElementById('manualReservationForm');
+    manualForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = Object.fromEntries(new FormData(manualForm).entries());
+      const { ok, data } = await postJson('/admin/reservas', payload);
+      if (ok && data.success) {
+        showAlert('success', data.message);
+        setTimeout(() => window.location.reload(), 600);
+      } else {
+        showAlert('danger', data.error || 'Error al crear la reserva manual');
+      }
+    });
+
+    const editForm = document.getElementById('editReservationForm');
+    editForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = Object.fromEntries(new FormData(editForm).entries());
+      const id = payload.id;
+      const { ok, data } = await postJson(`/admin/reservas/${id}/edit`, payload);
+      if (ok && data.success) {
+        showAlert('success', data.message);
+        setTimeout(() => window.location.reload(), 600);
+      } else {
+        showAlert('danger', data.error || 'Error al actualizar la reserva');
+      }
+    });
+  }
+
+  // ============================================
+  // CALENDAR
+  // ============================================
+  function initCalendar() {
+    const container = document.getElementById('calendar-container');
+    const monthSelector = document.getElementById('monthSelector');
+    const openSingleBtn = document.getElementById('openSingleAvailBtn');
+    const singleForm = document.getElementById('availabilityForm');
+    const rangeForm = document.getElementById('availabilityRangeForm');
+    if (!container) return;
+
+    const initial = (container.dataset.initialMonth || '').split('-');
+    let currentYear = Number(initial[0]) || new Date().getFullYear();
+    let currentMonth = (Number(initial[1]) || new Date().getMonth() + 1) - 1; // 0-indexed
+    let selectedDate = null;
+    let monthData = {};
+
+    function pad2(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    async function loadCalendar() {
+      try {
+        const res = await fetch(
+          `/api/availability/${currentYear}/${pad2(currentMonth + 1)}?detailed=1`
+        );
+        if (!res.ok) throw new Error('HTTP error');
+        monthData = await res.json();
+        renderCalendar();
+      } catch (err) {
+        console.error('Error loading calendar:', err);
+        showAlert('danger', 'Error al cargar el calendario');
+      }
+    }
+
+    function renderCalendar() {
+      const firstDay = new Date(Date.UTC(currentYear, currentMonth, 1));
+      const offset = firstDay.getUTCDay();
+      const cursor = new Date(Date.UTC(currentYear, currentMonth, 1 - offset));
+
+      let html = '<div class="calendar-container">';
+      DAY_NAMES.forEach((d) => {
+        html += `<div class="calendar-header">${d}</div>`;
+      });
+
+      for (let week = 0; week < 6; week++) {
+        let hasCurrentMonth = false;
+        for (let col = 0; col < 7; col++) {
+          const y = cursor.getUTCFullYear();
+          const m = cursor.getUTCMonth();
+          const d = cursor.getUTCDate();
+          const ymd = `${y}-${pad2(m + 1)}-${pad2(d)}`;
+          const isCurrent = m === currentMonth;
+          if (isCurrent) hasCurrentMonth = true;
+          const info = monthData[ymd] || { status: 'available', price: 50000 };
+          const isSelected = selectedDate === ymd;
+
+          html += `
+            <button
+              type="button"
+              class="calendar-day border-0 ${info.status} ${!isCurrent ? 'other-month' : ''} ${isSelected ? 'selected' : ''}"
+              data-date="${ymd}"
+            >
+              <div>
+                <div class="fw-bold">${d}</div>
+                ${isCurrent ? `<small>$${Math.round((info.price || 0) / 1000)}k</small>` : ''}
+              </div>
+            </button>`;
+          cursor.setUTCDate(cursor.getUTCDate() + 1);
+        }
+        if (!hasCurrentMonth && week > 3) break;
+      }
+
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    container.addEventListener('click', (e) => {
+      const cell = e.target.closest('.calendar-day[data-date]');
+      if (!cell) return;
+      selectedDate = cell.dataset.date;
+      const info = monthData[selectedDate] || { status: 'available', notes: '' };
+      document.getElementById('selectedDate').value = selectedDate;
+      document.getElementById('status').value = info.status;
+      document.getElementById('notes').value = info.notes || '';
+      renderCalendar();
+    });
+
+    monthSelector?.addEventListener('change', () => {
+      const [y, m] = monthSelector.value.split('-').map(Number);
+      currentYear = y;
+      currentMonth = m - 1;
+      selectedDate = null;
+      loadCalendar();
+    });
+
+    openSingleBtn?.addEventListener('click', () => {
+      if (!selectedDate) {
+        showAlert('warning', 'Selecciona primero una fecha en el calendario');
+        return;
+      }
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('availabilityModal')).show();
+    });
+
+    singleForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = Object.fromEntries(new FormData(singleForm).entries());
+      const { ok, data } = await postJson('/admin/availability', payload);
+      if (ok && data.success) {
+        showAlert('success', data.message);
+        bootstrap.Modal.getInstance(document.getElementById('availabilityModal'))?.hide();
+        await loadCalendar();
+      } else {
+        showAlert('danger', data.error || 'Error al actualizar disponibilidad');
+      }
+    });
+
+    rangeForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = Object.fromEntries(new FormData(rangeForm).entries());
+      const { ok, data } = await postJson('/admin/availability-range', payload);
+      if (ok && data.success) {
+        showAlert('success', data.message);
+        bootstrap.Modal.getInstance(document.getElementById('availabilityRangeModal'))?.hide();
+        rangeForm.reset();
+        await loadCalendar();
+      } else {
+        showAlert('danger', data.message || data.error || 'Error al actualizar rango');
+      }
+    });
+
+    loadCalendar();
+  }
+
+  // ============================================
+  // PRICES
+  // ============================================
+  function initPrices() {
+    const modalEl = document.getElementById('editPriceModal');
+    const editModal = modalEl ? new bootstrap.Modal(modalEl) : null;
+
+    document.querySelectorAll('.edit-price-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.getElementById('editDayId').value = btn.dataset.id || '';
+        document.getElementById('editDate').value = btn.dataset.date || '';
+        document.getElementById('editPrice').value = btn.dataset.price || '';
+        document.getElementById('editCategory').value = btn.dataset.category || 'normal';
+        editModal?.show();
+      });
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    const successMap = {
+      'category-updated': 'Precios actualizados por categoría exitosamente',
+      'range-updated': 'Precios actualizados por rango de fechas exitosamente',
+      'single-updated': 'Precio individual actualizado exitosamente'
     };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
+    const errorMap = {
+      'category-update-failed': 'Error al actualizar precios por categoría',
+      'range-update-failed': 'Error al actualizar precios por rango de fechas',
+      'invalid-range': 'La fecha de fin debe ser igual o posterior a la fecha de inicio',
+      'single-update-failed': 'Error al actualizar precio individual'
+    };
 
-// Export admin utilities
-window.AdminUtils = {
-  showAlert,
-  cancelReservation,
-  exportData,
-  printReport
-};
+    const s = params.get('success');
+    const err = params.get('error');
+    if (s) showAlert('success', successMap[s] || 'Operación completada exitosamente');
+    if (err) showAlert('danger', errorMap[err] || 'Ha ocurrido un error');
+  }
+})();

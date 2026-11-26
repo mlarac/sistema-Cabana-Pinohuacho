@@ -1,94 +1,91 @@
-<% extraScripts = `
-<script>
-  function cancelReservation(reservationId) {
-    if (!confirm('¿Estás seguro de que quieres cancelar esta reserva?')) {
-      return;
-    }
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4" data-admin-page="reservations">
+  <div>
+    <h1 class="display-6 fw-bold mb-0">Gestión de Reservas</h1>
+    <div class="text-muted"><%= totalCount %> <%= totalCount === 1 ? 'reserva encontrada' : 'reservas encontradas' %></div>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#manualReservationModal">
+      <i class="fas fa-plus me-1"></i> Nueva Reserva Manual
+    </button>
+    <a class="btn btn-outline-secondary" href="/admin/export/reservations<%= filters.status ? '?status=' + encodeURIComponent(filters.status) : '' %>">
+      <i class="fas fa-file-csv me-1"></i> Exportar CSV
+    </a>
+  </div>
+</div>
 
-    fetch('/admin/reservas/' + reservationId + '/cancel', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        const row = document.getElementById('reservation-' + reservationId);
-        const statusCell = row.querySelector('td:nth-child(6)');
-        const actionCell = row.querySelector('td:nth-child(8)');
-        statusCell.innerHTML = '<span class="badge bg-danger">Cancelada</span>';
-        actionCell.innerHTML = '<span class="text-muted">Cancelada</span>';
-        showAlert('success', data.message);
-      } else {
-        showAlert('danger', data.error || 'Error al cancelar la reserva');
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      showAlert('danger', 'Error de conexión');
-    });
-  }
-
-  function showAlert(type, message) {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = 'alert alert-' + type + ' alert-dismissible fade show';
-    alertDiv.innerHTML = message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
-    const container = document.querySelector('main');
-    container.insertBefore(alertDiv, container.firstChild);
-    setTimeout(() => { alertDiv.remove(); }, 5000);
-  }
-</script>
-` %>
-
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1 class="display-6 fw-bold">Gestión de Reservas</h1>
-  <div class="text-muted"><%= reservations.length %> reservas encontradas</div>
+<!-- Search & Filter Bar -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <form method="GET" action="/admin/reservas" class="row g-3 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label small fw-semibold" for="filterQ">Buscar</label>
+        <input
+          type="text"
+          id="filterQ"
+          name="q"
+          class="form-control"
+          placeholder="Código, nombre, email o teléfono..."
+          value="<%= filters.q || '' %>"
+        >
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold" for="filterStatus">Estado</label>
+        <select id="filterStatus" name="status" class="form-select">
+          <option value="" <%= !filters.status ? 'selected' : '' %>>Todos los estados</option>
+          <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pendientes</option>
+          <option value="confirmed" <%= filters.status === 'confirmed' ? 'selected' : '' %>>Confirmadas</option>
+          <option value="cancelled" <%= filters.status === 'cancelled' ? 'selected' : '' %>>Canceladas</option>
+        </select>
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary flex-grow-1">
+          <i class="fas fa-search me-1"></i> Filtrar
+        </button>
+        <a href="/admin/reservas" class="btn btn-outline-secondary">Limpiar</a>
+      </div>
+    </form>
+  </div>
 </div>
 
 <div class="card border-0 shadow-sm">
   <div class="card-body p-0">
     <% if (reservations && reservations.length > 0) { %>
     <div class="table-responsive">
-      <table class="table table-hover mb-0">
+      <table class="table table-hover mb-0 align-middle">
         <thead class="bg-light">
           <tr>
-            <th class="px-4 py-3">ID</th>
+            <th class="px-4 py-3">Código / ID</th>
             <th class="py-3">Huésped</th>
             <th class="py-3">Contacto</th>
             <th class="py-3">Fechas</th>
-            <th class="py-3">Huéspedes</th>
+            <th class="py-3">Pers.</th>
             <th class="py-3">Estado</th>
             <th class="py-3 text-end">Total</th>
-            <th class="py-3 text-center">Acciones</th>
+            <th class="py-3 text-center no-sort">Acciones</th>
           </tr>
         </thead>
         <tbody>
           <% reservations.forEach(function(reservation) { %>
           <tr id="reservation-<%= reservation.id %>">
             <td class="px-4 py-3">
-              <div class="fw-bold">#<%= reservation.id %></div>
-              <div class="small text-muted"><%= reservation.createdAt %></div>
+              <div class="fw-bold"><%= reservation.bookingCode || ('#' + reservation.id) %></div>
+              <div class="small text-muted">#<%= reservation.id %> · <%= reservation.createdAt %></div>
             </td>
 
             <td class="py-3">
               <div class="fw-bold"><%= reservation.guestName %></div>
               <% if (reservation.notes) { %>
-              <div class="small text-muted">
+              <div class="small text-muted" title="<%= reservation.notes %>">
                 <i class="fas fa-sticky-note me-1"></i>
-                <%= reservation.notes.substring(0, 30) + (reservation.notes.length > 30 ? '...' : '') %>
+                <%= reservation.notes.substring(0, 35) + (reservation.notes.length > 35 ? '...' : '') %>
               </div>
               <% } %>
             </td>
 
             <td class="py-3">
               <div class="small">
-                <div>
-                  <i class="fas fa-envelope me-1"></i>
-                  <%= reservation.guestEmail %>
-                </div>
-                <div>
-                  <i class="fas fa-phone me-1"></i>
-                  <%= reservation.guestPhone %>
-                </div>
+                <div><i class="fas fa-envelope me-1"></i> <%= reservation.guestEmail %></div>
+                <div><i class="fas fa-phone me-1"></i> <%= reservation.guestPhone %></div>
               </div>
             </td>
 
@@ -100,14 +97,14 @@
             </td>
 
             <td class="py-3">
-              <span class="badge bg-light text-dark"><%= reservation.guests + (reservation.guests === 1 ? ' persona' : ' personas') %></span>
+              <span class="badge bg-light text-dark"><%= reservation.guests %></span>
             </td>
 
-            <td class="py-3">
+            <td class="py-3" data-cell="status">
               <% if (reservation.status === 'confirmed') { %>
               <span class="badge bg-success">Confirmada</span>
               <% } else if (reservation.status === 'pending') { %>
-              <span class="badge bg-warning">Pendiente</span>
+              <span class="badge bg-warning text-dark">Pendiente</span>
               <% } else if (reservation.status === 'cancelled') { %>
               <span class="badge bg-danger">Cancelada</span>
               <% } else { %>
@@ -119,15 +116,51 @@
               <div class="fw-bold"><%= reservation.totalPrice %></div>
             </td>
 
-            <td class="py-3 text-center">
-              <% if (reservation.status !== 'cancelled') { %>
-              <button class="btn btn-outline-danger btn-sm" onclick="cancelReservation(<%= reservation.id %>)">
-                <i class="fas fa-times me-1"></i>
-                Cancelar
-              </button>
-              <% } else { %>
-              <span class="text-muted">Cancelada</span>
-              <% } %>
+            <td class="py-3 text-center" data-cell="actions">
+              <div class="d-inline-flex gap-1 flex-wrap justify-content-center">
+                <% if (reservation.status === 'pending') { %>
+                <button
+                  type="button"
+                  class="btn btn-success btn-sm"
+                  data-action="confirm-reservation"
+                  data-id="<%= reservation.id %>"
+                  title="Confirmar reserva"
+                >
+                  <i class="fas fa-check"></i>
+                </button>
+                <% } %>
+
+                <button
+                  type="button"
+                  class="btn btn-outline-primary btn-sm"
+                  data-action="edit-reservation"
+                  data-id="<%= reservation.id %>"
+                  data-name="<%= reservation.guestName %>"
+                  data-email="<%= reservation.guestEmail %>"
+                  data-phone="<%= reservation.guestPhone %>"
+                  data-checkin="<%= reservation.rawCheckIn %>"
+                  data-checkout="<%= reservation.rawCheckOut %>"
+                  data-guests="<%= reservation.guests %>"
+                  data-status="<%= reservation.status %>"
+                  data-total="<%= reservation.rawTotalPrice %>"
+                  data-notes="<%= reservation.notes || '' %>"
+                  title="Editar reserva"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+
+                <% if (reservation.status !== 'cancelled') { %>
+                <button
+                  type="button"
+                  class="btn btn-outline-danger btn-sm"
+                  data-action="cancel-reservation"
+                  data-id="<%= reservation.id %>"
+                  title="Cancelar reserva"
+                >
+                  <i class="fas fa-times"></i>
+                </button>
+                <% } %>
+              </div>
             </td>
           </tr>
           <% }); %>
@@ -137,8 +170,8 @@
     <% } else { %>
     <div class="text-center py-5">
       <i class="fas fa-inbox fa-4x text-muted mb-4"></i>
-      <h4 class="text-muted">No hay reservas registradas</h4>
-      <p class="text-muted">Cuando recibas reservas, aparecerán aquí.</p>
+      <h4 class="text-muted">No hay reservas que coincidan</h4>
+      <p class="text-muted mb-0">Prueba ajustar los filtros o crea una reserva manual.</p>
     </div>
     <% } %>
   </div>
@@ -146,25 +179,154 @@
 
 <!-- Pagination -->
 <% if (typeof pagination !== 'undefined' && pagination && pagination.totalPages > 1) { %>
-<nav class="mt-4">
+<% const qsBase = (filters.status ? '&status=' + encodeURIComponent(filters.status) : '') + (filters.q ? '&q=' + encodeURIComponent(filters.q) : ''); %>
+<nav class="mt-4" aria-label="Paginación de reservas">
   <ul class="pagination justify-content-center">
     <% if (pagination.hasPrev) { %>
     <li class="page-item">
-      <a class="page-link" href="?page=<%= pagination.currentPage - 1 %>">Anterior</a>
+      <a class="page-link" href="?page=<%= pagination.currentPage - 1 %><%= qsBase %>">Anterior</a>
     </li>
     <% } %>
 
     <% for (let i = 1; i <= pagination.totalPages; i++) { %>
     <li class="page-item <%= pagination.currentPage === i ? 'active' : '' %>">
-      <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+      <a class="page-link" href="?page=<%= i %><%= qsBase %>"><%= i %></a>
     </li>
     <% } %>
 
     <% if (pagination.hasNext) { %>
     <li class="page-item">
-      <a class="page-link" href="?page=<%= pagination.currentPage + 1 %>">Siguiente</a>
+      <a class="page-link" href="?page=<%= pagination.currentPage + 1 %><%= qsBase %>">Siguiente</a>
     </li>
     <% } %>
   </ul>
 </nav>
 <% } %>
+
+<!-- Modal: Nueva Reserva Manual -->
+<div class="modal fade" id="manualReservationModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nueva Reserva Manual</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form id="manualReservationForm">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="manualGuestName">Nombre Huésped *</label>
+              <input class="form-control" id="manualGuestName" name="guestName" type="text" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="manualGuestEmail">Email *</label>
+              <input class="form-control" id="manualGuestEmail" name="guestEmail" type="email" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="manualGuestPhone">Teléfono *</label>
+              <input class="form-control" id="manualGuestPhone" name="guestPhone" type="tel" required placeholder="+56 9 ...">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label" for="manualGuests">Huéspedes *</label>
+              <select class="form-select" id="manualGuests" name="guests" required>
+                <% for (let i = 1; i <= cabin.maxGuests; i++) { %>
+                  <option value="<%= i %>"><%= i %></option>
+                <% } %>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label" for="manualStatus">Estado</label>
+              <select class="form-select" id="manualStatus" name="status">
+                <option value="confirmed" selected>Confirmada</option>
+                <option value="pending">Pendiente</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="manualCheckIn">Entrada *</label>
+              <input class="form-control" id="manualCheckIn" name="checkIn" type="date" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="manualCheckOut">Salida *</label>
+              <input class="form-control" id="manualCheckOut" name="checkOut" type="date" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="manualNotes">Notas</label>
+              <textarea class="form-control" id="manualNotes" name="notes" rows="2"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" form="manualReservationForm" class="btn btn-success">Crear Reserva</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Editar Reserva -->
+<div class="modal fade" id="editReservationModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Editar Reserva</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editReservationForm">
+          <input type="hidden" id="editResId" name="id">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="editResName">Nombre Huésped *</label>
+              <input class="form-control" id="editResName" name="guestName" type="text" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="editResEmail">Email *</label>
+              <input class="form-control" id="editResEmail" name="guestEmail" type="email" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="editResPhone">Teléfono *</label>
+              <input class="form-control" id="editResPhone" name="guestPhone" type="tel" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label" for="editResGuests">Huéspedes *</label>
+              <select class="form-select" id="editResGuests" name="guests" required>
+                <% for (let i = 1; i <= cabin.maxGuests; i++) { %>
+                  <option value="<%= i %>"><%= i %></option>
+                <% } %>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label" for="editResStatus">Estado</label>
+              <select class="form-select" id="editResStatus" name="status">
+                <option value="pending">Pendiente</option>
+                <option value="confirmed">Confirmada</option>
+                <option value="cancelled">Cancelada</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="editResCheckIn">Entrada *</label>
+              <input class="form-control" id="editResCheckIn" name="checkIn" type="date" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="editResCheckOut">Salida *</label>
+              <input class="form-control" id="editResCheckOut" name="checkOut" type="date" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="editResTotal">Total (CLP)</label>
+              <input class="form-control" id="editResTotal" name="totalPrice" type="number" min="0" step="1000">
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="editResNotes">Notas</label>
+              <textarea class="form-control" id="editResNotes" name="notes" rows="2"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" form="editReservationForm" class="btn btn-primary">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+</div>

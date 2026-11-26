@@ -1,10 +1,12 @@
-const moment = require('moment');
+const cabin = require('../config/cabin');
+const { todayYMD } = require('../services/dateUtils');
 
 exports.index = async (req, res) => {
   try {
     res.render('index', {
-      title: 'Cabaña Pino Huacho - Descanso Natural en la Araucanía',
-      currentDate: moment().format('YYYY-MM-DD')
+      title: `${cabin.name} - ${cabin.tagline}`,
+      metaDescription: `Arrienda ${cabin.name} en la Araucanía. Capacidad hasta ${cabin.maxGuests} personas, ${cabin.bedrooms} habitaciones, calefacción a leña y calendario de disponibilidad en tiempo real.`,
+      currentDate: todayYMD()
     });
   } catch (error) {
     console.error('Error loading home page:', error);
@@ -17,42 +19,11 @@ exports.index = async (req, res) => {
 
 exports.features = async (req, res) => {
   try {
-    const features = [
-      {
-        icon: 'home',
-        title: 'Capacidad para 6 personas',
-        description: '3 habitaciones cómodas con camas matrimoniales y individuales'
-      },
-      {
-        icon: 'wifi',
-        title: 'Wi-Fi gratuito',
-        description: 'Internet de alta velocidad para mantenerte conectado'
-      },
-      {
-        icon: 'car',
-        title: 'Estacionamiento privado',
-        description: 'Espacio seguro para tu vehículo'
-      },
-      {
-        icon: 'flame',
-        title: 'Calefacción a leña',
-        description: 'Ambiente cálido y acogedor durante todo el año'
-      },
-      {
-        icon: 'utensils',
-        title: 'Cocina equipada',
-        description: 'Todo lo necesario para preparar tus comidas favoritas'
-      },
-      {
-        icon: 'tree-pine',
-        title: 'Entorno natural',
-        description: 'Rodeada de bosques nativos y paisajes únicos'
-      }
-    ];
-
     res.render('features', {
-      title: 'Características de la Cabaña',
-      features
+      title: `Características - ${cabin.name}`,
+      metaDescription: `Conoce las comodidades de ${cabin.name}: ${cabin.maxGuests} personas, ${cabin.bedrooms} habitaciones, cocina equipada, parrilla y atractivos cercanos a Lican Ray y Coñaripe.`,
+      features: cabin.features,
+      gallery: cabin.gallery
     });
   } catch (error) {
     console.error('Error loading features page:', error);
@@ -61,4 +32,31 @@ exports.features = async (req, res) => {
       message: 'Error al cargar las características'
     });
   }
+};
+
+exports.sitemap = (req, res) => {
+  const baseUrl = cabin.siteUrl;
+  const today = todayYMD();
+  const urls = [
+    { loc: '/', priority: '1.0', changefreq: 'daily' },
+    { loc: '/caracteristicas', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/reservar', priority: '0.9', changefreq: 'daily' },
+    { loc: '/consultar-reserva', priority: '0.5', changefreq: 'monthly' }
+  ];
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls
+      .map(
+        (u) => `  <url>
+    <loc>${baseUrl}${u.loc}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${u.changefreq}</changefreq>
+    <priority>${u.priority}</priority>
+  </url>`
+      )
+      .join('\n')}
+</urlset>`;
+
+  res.type('application/xml').send(xml);
 };

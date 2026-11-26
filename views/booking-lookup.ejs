@@ -1,0 +1,89 @@
+<section class="py-5 mt-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+        <div class="card shadow-lg">
+          <div class="card-header text-white text-center py-4">
+            <h1 class="h3 mb-1">🔍 Consultar Estado de Reserva</h1>
+            <p class="mb-0 small">Ingresa tu código de reserva y el correo con el que reservaste</p>
+          </div>
+
+          <div class="card-body p-4 p-md-5">
+            <% if (error) { %>
+            <div class="alert alert-danger d-block mb-4"><%= error %></div>
+            <% } %>
+
+            <form method="POST" action="/consultar-reserva" class="mb-4">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label" for="bookingCode">Código de Reserva</label>
+                  <input
+                    class="form-control text-uppercase"
+                    type="text"
+                    id="bookingCode"
+                    name="bookingCode"
+                    placeholder="Ej: PH-2026-A1B2"
+                    value="<%= formData && formData.bookingCode ? formData.bookingCode : '' %>"
+                    required
+                  >
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="guestEmail">Correo Electrónico</label>
+                  <input
+                    class="form-control"
+                    type="email"
+                    id="guestEmail"
+                    name="guestEmail"
+                    placeholder="tu@correo.cl"
+                    value="<%= formData && formData.guestEmail ? formData.guestEmail : '' %>"
+                    required
+                  >
+                </div>
+              </div>
+              <div class="mt-4 text-center">
+                <button type="submit" class="btn btn-primary btn-lg">Consultar Reserva</button>
+              </div>
+            </form>
+
+            <% if (reservation) { %>
+            <div class="border rounded p-4 bg-light">
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h4 class="mb-0 fw-bold">Reserva <%= reservation.bookingCode %></h4>
+                <% if (reservation.status === 'confirmed') { %>
+                  <span class="badge bg-success fs-6">Confirmada</span>
+                <% } else if (reservation.status === 'pending') { %>
+                  <span class="badge bg-warning text-dark fs-6">Pendiente de Confirmación</span>
+                <% } else { %>
+                  <span class="badge bg-danger fs-6">Cancelada</span>
+                <% } %>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-sm-6">
+                  <strong>Huésped:</strong><br><%= reservation.guestName %>
+                </div>
+                <div class="col-sm-6">
+                  <strong>Huéspedes:</strong><br><%= reservation.guests %> <%= reservation.guests === 1 ? 'persona' : 'personas' %>
+                </div>
+                <div class="col-sm-6">
+                  <strong>Check-in:</strong><br><%= reservation.checkInFormatted %> (<%= cabin.checkInTime %>)
+                </div>
+                <div class="col-sm-6">
+                  <strong>Check-out:</strong><br><%= reservation.checkOutFormatted %> (<%= cabin.checkOutTime %>)
+                </div>
+                <div class="col-sm-6">
+                  <strong>Noches:</strong><br><%= reservation.nights %>
+                </div>
+                <div class="col-sm-6">
+                  <strong>Total:</strong><br><span class="fw-bold"><%= reservation.totalPriceFormatted %> CLP</span>
+                </div>
+              </div>
+            </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,18 +1,9 @@
-<% extraScripts = `
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
-      window.location.reload();
-    }, 300000);
-  });
-</script>
-` %>
-
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1 class="display-6 fw-bold">Panel de Administración</h1>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4" data-admin-page="dashboard">
+  <h1 class="display-6 fw-bold mb-0">Panel de Administración</h1>
   <div class="text-muted">
     <i class="fas fa-calendar me-2"></i>
-    <%= new Date().toLocaleDateString('es-CL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %>
+    <%= new Date().toLocaleDateString('es-CL', { weekday: 'long' , year: 'numeric' , month: 'long' , day: 'numeric' })
+      %>
   </div>
 </div>
 
@@ -26,8 +17,10 @@
             <i class="fas fa-calendar-check fa-2x"></i>
           </div>
           <div>
-            <h3 class="fw-bold mb-0"><%= stats.totalReservations %></h3>
-            <p class="text-muted mb-0">Total Reservas</p>
+            <h3 class="fw-bold mb-0" data-stat="total-reservations">
+              <%= stats.totalReservations %>
+            </h3>
+            <p class="text-muted mb-0">Reservas Activas</p>
           </div>
         </div>
       </div>
@@ -42,7 +35,9 @@
             <i class="fas fa-clock fa-2x"></i>
           </div>
           <div>
-            <h3 class="fw-bold mb-0"><%= stats.pendingReservations %></h3>
+            <h3 class="fw-bold mb-0" data-stat="pending-reservations">
+              <%= stats.pendingReservations %>
+            </h3>
             <p class="text-muted mb-0">Pendientes</p>
           </div>
         </div>
@@ -58,7 +53,9 @@
             <i class="fas fa-chart-line fa-2x"></i>
           </div>
           <div>
-            <h3 class="fw-bold mb-0"><%= stats.thisMonthReservations %></h3>
+            <h3 class="fw-bold mb-0" data-stat="this-month-reservations">
+              <%= stats.thisMonthReservations %>
+            </h3>
             <p class="text-muted mb-0">Este Mes</p>
           </div>
         </div>
@@ -74,8 +71,10 @@
             <i class="fas fa-dollar-sign fa-2x"></i>
           </div>
           <div>
-            <h3 class="fw-bold mb-0"><%= stats.thisMonthRevenue %></h3>
-            <p class="text-muted mb-0">Ingresos del Mes</p>
+            <h3 class="fw-bold mb-0" data-stat="this-month-revenue">
+              <%= stats.thisMonthRevenue %>
+            </h3>
+            <p class="text-muted mb-0">Confirmado (Mes)</p>
           </div>
         </div>
       </div>
@@ -84,62 +83,72 @@
 </div>
 
 <div class="row g-4">
-  <!-- Recent Reservations -->
+  <!-- Upcoming Reservations -->
   <div class="col-lg-7">
     <div class="card border-0 shadow-sm h-100">
       <div class="card-header bg-white border-bottom-0 py-3">
         <div class="d-flex justify-content-between align-items-center">
           <h5 class="fw-bold mb-0">
             <i class="fas fa-calendar-alt me-2"></i>
-            Próximas Reservas
+            Próximas Reservas (14 días)
           </h5>
           <a class="btn btn-outline-primary btn-sm" href="/admin/reservas">Ver Todas</a>
         </div>
       </div>
 
       <div class="card-body p-0">
-        <% if (recentReservations && recentReservations.length > 0) { %>
-        <div class="table-responsive">
-          <table class="table table-hover mb-0">
-            <thead class="bg-light">
-              <tr>
-                <th class="px-4 py-3">Huésped</th>
-                <th class="py-3">Fechas</th>
-                <th class="py-3">Huéspedes</th>
-                <th class="py-3 text-end">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% recentReservations.forEach(function(reservation) { %>
-              <tr>
-                <td class="px-4 py-3">
-                  <div class="fw-bold"><%= reservation.guestName %></div>
-                  <div class="small text-muted"><%= reservation.guestEmail %></div>
-                </td>
-                <td class="py-3">
-                  <div class="small">
-                    <strong><%= reservation.checkIn %></strong>
-                    &nbsp;→&nbsp;
-                    <%= reservation.checkOut %>
-                  </div>
-                </td>
-                <td class="py-3">
-                  <span class="badge bg-light text-dark"><%= reservation.guests %></span>
-                </td>
-                <td class="py-3 text-end">
-                  <div class="fw-bold"><%= reservation.totalPrice %></div>
-                </td>
-              </tr>
-              <% }); %>
-            </tbody>
-          </table>
-        </div>
-        <% } else { %>
-        <div class="text-center py-5">
-          <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-          <p class="text-muted">No hay reservas próximas</p>
-        </div>
-        <% } %>
+        <% if (recentReservations && recentReservations.length> 0) { %>
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th class="px-4 py-3">Huésped</th>
+                  <th class="py-3">Fechas</th>
+                  <th class="py-3">Estado</th>
+                  <th class="py-3 text-end pe-4">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% recentReservations.forEach(function(reservation) { %>
+                  <tr>
+                    <td class="px-4 py-3">
+                      <div class="fw-bold">
+                        <%= reservation.guestName %>
+                      </div>
+                      <div class="small text-muted">
+                        <%= reservation.bookingCode || ('#' + reservation.id) %> · <%= reservation.guests %> pers.
+                      </div>
+                    </td>
+                    <td class="py-3">
+                      <div class="small">
+                        <strong>
+                          <%= reservation.checkIn %>
+                        </strong> → <%= reservation.checkOut %>
+                      </div>
+                    </td>
+                    <td class="py-3">
+                      <% if (reservation.status==='confirmed' ) { %>
+                        <span class="badge bg-success">Confirmada</span>
+                        <% } else { %>
+                          <span class="badge bg-warning text-dark">Pendiente</span>
+                          <% } %>
+                    </td>
+                    <td class="py-3 text-end pe-4">
+                      <div class="fw-bold">
+                        <%= reservation.totalPrice %>
+                      </div>
+                    </td>
+                  </tr>
+                  <% }); %>
+              </tbody>
+            </table>
+          </div>
+          <% } else { %>
+            <div class="text-center py-5">
+              <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+              <p class="text-muted mb-0">No hay reservas activas en los próximos 14 días</p>
+            </div>
+            <% } %>
       </div>
     </div>
   </div>
@@ -161,7 +170,7 @@
               <i class="fas fa-list fa-2x me-3"></i>
               <div>
                 <div class="fw-bold">Gestionar Reservas</div>
-                <div class="small">Ver, editar y cancelar reservas</div>
+                <div class="small">Confirmar, editar, crear y exportar</div>
               </div>
             </div>
           </a>
@@ -170,18 +179,28 @@
             <div class="d-flex align-items-center">
               <i class="fas fa-calendar fa-2x me-3"></i>
               <div>
-                <div class="fw-bold">Calendario</div>
-                <div class="small">Gestionar disponibilidad por fechas</div>
+                <div class="fw-bold">Calendario Maestro</div>
+                <div class="small">Bloquear días o rangos por mantenimiento</div>
               </div>
             </div>
           </a>
 
-          <a class="btn btn-info btn-lg text-start" href="/" target="_blank">
+          <a class="btn btn-warning btn-lg text-start text-dark" href="/admin/precios">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-dollar-sign fa-2x me-3"></i>
+              <div>
+                <div class="fw-bold">Gestión de Precios</div>
+                <div class="small">Tarifas por temporada, categoría o rango</div>
+              </div>
+            </div>
+          </a>
+
+          <a class="btn btn-info btn-lg text-start text-white" href="/" target="_blank" rel="noopener noreferrer">
             <div class="d-flex align-items-center">
               <i class="fas fa-eye fa-2x me-3"></i>
               <div>
                 <div class="fw-bold">Vista del Sitio</div>
-                <div class="small">Ver cómo lo ven los clientes</div>
+                <div class="small">Ver cómo lo ven los huéspedes</div>
               </div>
             </div>
           </a>

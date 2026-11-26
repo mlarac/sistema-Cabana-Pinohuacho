@@ -1,22 +1,22 @@
 const swaggerJsdoc = require('swagger-jsdoc');
+const cabin = require('./cabin');
 
 const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'API Cabaña Pino Huacho',
-      version: '1.0.0',
-      description: 'Documentación de la API para el sistema de reservas de Cabaña Pino Huacho',
+      title: `API ${cabin.name}`,
+      version: '2.0.0',
+      description: 'Documentación de la API para el sistema de reservas de Cabaña Pino Huacho'
     },
     servers: [
       {
-        url: 'http://localhost:3000',
-        description: 'Servidor Local (Desarrollo)',
-      },
-    ],
+        url: cabin.siteUrl,
+        description: 'Servidor Activo'
+      }
+    ]
   },
-  apis: ['./routes/*.js', './controllers/*.js'],
+  apis: ['./routes/*.js']
 };
 
-const specs = swaggerJsdoc(options);
-module.exports = specs;
+module.exports = swaggerJsdoc(options);

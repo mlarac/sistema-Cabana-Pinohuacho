@@ -4,31 +4,68 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
+  <meta name="description" content="<%= typeof metaDescription !== 'undefined' ? metaDescription : cabin.tagline %>">
+  <meta name="csrf-token" content="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+  <link rel="canonical" href="<%= cabin.siteUrl %><%= typeof currentPath !== 'undefined' ? currentPath : '/' %>">
+
+  <!-- Open Graph / Social -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_CL">
+  <meta property="og:title" content="<%= title %>">
+  <meta property="og:description" content="<%= typeof metaDescription !== 'undefined' ? metaDescription : cabin.tagline %>">
+  <meta property="og:url" content="<%= cabin.siteUrl %><%= typeof currentPath !== 'undefined' ? currentPath : '/' %>">
+  <meta property="og:image" content="<%= cabin.siteUrl %>/img/portada.webp">
+  <meta name="twitter:card" content="summary_large_image">
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/styles.css">
   <%- typeof extraStyles !== 'undefined' ? extraStyles : '' %>
+
+  <script type="application/ld+json">
+    <%- JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'LodgingBusiness',
+      name: cabin.name,
+      description: cabin.tagline,
+      url: cabin.siteUrl,
+      image: cabin.siteUrl + '/img/portada.webp',
+      telephone: cabin.contact.phone,
+      email: cabin.contact.email,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Pino Huacho',
+        addressRegion: 'Araucanía',
+        addressCountry: 'CL'
+      },
+      checkinTime: '15:00',
+      checkoutTime: '11:00'
+    }) %>
+  </script>
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
     <div class="container">
       <a class="navbar-brand" href="/">
-        <strong>Cabaña Pino Huacho</strong>
+        <strong><%= cabin.name %></strong>
       </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Abrir navegación">
         <span class="navbar-toggler-icon"></span>
       </button>
 
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
+        <ul class="navbar-nav ms-auto align-items-lg-center">
           <li class="nav-item">
-            <a class="nav-link" href="/">Inicio</a>
+            <a class="nav-link <%= currentPath === '/' ? 'active' : '' %>" href="/">Inicio</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/caracteristicas">Características</a>
+            <a class="nav-link <%= currentPath === '/caracteristicas' ? 'active' : '' %>" href="/caracteristicas">Características</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link btn btn-warning text-dark px-3 mx-2" href="/reservar">Reservar Ahora</a>
+            <a class="nav-link <%= currentPath === '/consultar-reserva' ? 'active' : '' %>" href="/consultar-reserva">Consultar Reserva</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link btn btn-warning text-dark px-3 mx-lg-2 mt-2 mt-lg-0" href="/reservar">Reservar Ahora</a>
           </li>
         </ul>
       </div>
@@ -41,37 +78,54 @@
 
   <footer class="bg-dark text-light py-5 mt-5">
     <div class="container">
-      <div class="row">
+      <div class="row g-4">
         <div class="col-md-4">
-          <h5>Cabaña Pino Huacho</h5>
-          <p>Descanso natural en el corazón de la Araucanía. Ubicada en un entorno privilegiado rodeado de bosques nativos.</p>
+          <h5><%= cabin.name %></h5>
+          <p><%= cabin.tagline %>. Ubicada en un entorno privilegiado rodeado de bosques nativos.</p>
         </div>
 
         <div class="col-md-4">
           <h5>Contacto</h5>
-          <p>
-            Email: info@pinohuacho.cl<br>
-            Teléfono: +56 9 1234 5678<br>
-            Dirección: Pino Huacho, IX Región
+          <p class="mb-0">
+            Email: <a class="text-light" href="mailto:<%= cabin.contact.email %>"><%= cabin.contact.email %></a><br>
+            Teléfono: <a class="text-light" href="tel:<%= cabin.contact.phone.replace(/\s+/g, '') %>"><%= cabin.contact.phone %></a><br>
+            Dirección: <%= cabin.shortLocation %>
           </p>
         </div>
 
         <div class="col-md-4">
-          <h5>Síguenos</h5>
-          <div class="social-links">
-            <a class="text-light me-3" href="#">Facebook</a>
-            <a class="text-light me-3" href="#">Instagram</a>
-            <a class="text-light" href="#">WhatsApp</a>
+          <h5>Enlaces Rápidos</h5>
+          <div class="social-links d-flex flex-wrap gap-2">
+            <a class="text-light" href="<%= cabin.contact.whatsappUrl %>" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            <a class="text-light" href="<%= cabin.contact.mapsUrl %>" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <% if (cabin.contact.instagramUrl) { %>
+              <a class="text-light" href="<%= cabin.contact.instagramUrl %>" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <% } %>
+            <% if (cabin.contact.facebookUrl) { %>
+              <a class="text-light" href="<%= cabin.contact.facebookUrl %>" target="_blank" rel="noopener noreferrer">Facebook</a>
+            <% } %>
           </div>
         </div>
       </div>
 
       <hr class="my-4">
       <div class="text-center">
-        <p>&copy; 2024 Cabaña Pino Huacho. Todos los derechos reservados.</p>
+        <p class="mb-0">&copy; <%= currentYear %> <%= cabin.name %>. Todos los derechos reservados.</p>
       </div>
     </div>
   </footer>
+
+  <a
+    class="whatsapp-float"
+    href="<%= cabin.contact.whatsappUrl %>"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Contactar por WhatsApp"
+    title="Consultar por WhatsApp"
+  >
+    <span aria-hidden="true">💬</span>
+    <span class="whatsapp-float-label">WhatsApp</span>
+  </a>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/main.js"></script>

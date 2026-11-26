@@ -1,75 +1,20 @@
-<% extraScripts = `
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const editButtons = document.querySelectorAll('.edit-price-btn');
-    const editModal = new bootstrap.Modal(document.getElementById('editPriceModal'));
-
-    editButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        const dayId = this.dataset.id;
-        const date = this.dataset.date;
-        const price = this.dataset.price;
-        document.getElementById('editDayId').value = dayId;
-        document.getElementById('editDate').value = date;
-        document.getElementById('editPrice').value = price;
-        editModal.show();
-      });
-    });
-
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('success')) {
-      showAlert(getSuccessMessage(urlParams.get('success')), 'success');
-    }
-    if (urlParams.get('error')) {
-      showAlert(getErrorMessage(urlParams.get('error')), 'danger');
-    }
-  });
-
-  function getSuccessMessage(type) {
-    const messages = {
-      'category-updated': 'Precios actualizados por categoría exitosamente',
-      'range-updated': 'Precios actualizados por rango de fechas exitosamente',
-      'single-updated': 'Precio individual actualizado exitosamente'
-    };
-    return messages[type] || 'Operación completada exitosamente';
-  }
-
-  function getErrorMessage(type) {
-    const messages = {
-      'category-update-failed': 'Error al actualizar precios por categoría',
-      'range-update-failed': 'Error al actualizar precios por rango de fechas',
-      'single-update-failed': 'Error al actualizar precio individual'
-    };
-    return messages[type] || 'Ha ocurrido un error';
-  }
-
-  function showAlert(message, type) {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = 'alert alert-' + type + ' alert-dismissible fade show';
-    alertDiv.innerHTML = message + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
-    const container = document.querySelector('.container-fluid');
-    container.insertBefore(alertDiv, container.firstChild);
-    setTimeout(() => { alertDiv.remove(); }, 5000);
-  }
-</script>
-` %>
-
-<div class="container-fluid py-4">
-  <h1 class="h3 mb-4">Gestión de Precios</h1>
+<div class="container-fluid px-0" data-admin-page="prices">
+  <h1 class="display-6 fw-bold mb-4">Gestión de Precios</h1>
 
   <div class="row">
     <div class="col-md-6 mb-4">
-      <div class="card shadow">
-        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-          <h6 class="m-0 font-weight-bold">Actualizar Precios por Categoría</h6>
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white py-3">
+          <h6 class="m-0 fw-bold">Actualizar Precios por Categoría (próximos 6 meses)</h6>
         </div>
         <div class="card-body">
           <form id="updateCategoryForm" action="/admin/precios/update-category" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <div class="mb-3">
               <label class="form-label" for="category">Categoría de Precio</label>
               <select class="form-select" id="category" name="category" required>
-                <option value="normal">Normal</option>
-                <option value="weekend">Fin de Semana</option>
+                <option value="normal">Normal (Dom–Jue)</option>
+                <option value="weekend">Fin de Semana (Vie–Sáb)</option>
                 <option value="high_season">Temporada Alta</option>
                 <option value="holiday">Feriado</option>
                 <option value="special">Especial</option>
@@ -80,7 +25,7 @@
               <label class="form-label" for="categoryPrice">Precio (CLP)</label>
               <div class="input-group">
                 <span class="input-group-text">$</span>
-                <input class="form-control" id="categoryPrice" type="number" name="price" min="0" step="1000" required>
+                <input class="form-control" id="categoryPrice" type="number" name="price" min="1000" step="1000" required>
               </div>
             </div>
 
@@ -91,21 +36,22 @@
     </div>
 
     <div class="col-md-6 mb-4">
-      <div class="card shadow">
-        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-          <h6 class="m-0 font-weight-bold">Actualizar Precios por Rango de Fechas</h6>
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white py-3">
+          <h6 class="m-0 fw-bold">Actualizar Precios por Rango de Fechas</h6>
         </div>
         <div class="card-body">
           <form id="updateRangeForm" action="/admin/precios/update-range" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label" for="startDate">Fecha Inicio</label>
-                <input class="form-control" id="startDate" type="date" name="startDate" required>
+                <input class="form-control" id="startDate" type="date" name="startDate" min="<%= todayDate %>" required>
               </div>
 
               <div class="col-md-6 mb-3">
                 <label class="form-label" for="endDate">Fecha Fin</label>
-                <input class="form-control" id="endDate" type="date" name="endDate" required>
+                <input class="form-control" id="endDate" type="date" name="endDate" min="<%= todayDate %>" required>
               </div>
             </div>
 
@@ -113,7 +59,7 @@
               <label class="form-label" for="rangePrice">Precio (CLP)</label>
               <div class="input-group">
                 <span class="input-group-text">$</span>
-                <input class="form-control" id="rangePrice" type="number" name="price" min="0" step="1000" required>
+                <input class="form-control" id="rangePrice" type="number" name="price" min="1000" step="1000" required>
               </div>
             </div>
 
@@ -138,13 +84,13 @@
 
   <div class="row">
     <div class="col-12 mb-4">
-      <div class="card shadow">
-        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-          <h6 class="m-0 font-weight-bold">Vista Previa de Precios</h6>
+      <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+          <h6 class="m-0 fw-bold">Tarifario Próximos 3 Meses (<%= availabilityData.length %> días)</h6>
         </div>
         <div class="card-body">
           <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-bordered table-hover align-middle mb-0">
               <thead>
                 <tr>
                   <th>Fecha</th>
@@ -152,7 +98,7 @@
                   <th>Categoría</th>
                   <th>Precio</th>
                   <th>Estado</th>
-                  <th>Acciones</th>
+                  <th class="no-sort">Acciones</th>
                 </tr>
               </thead>
               <tbody id="pricePreviewTable">
@@ -160,16 +106,24 @@
                 <tr class="<%= day.status === 'occupied' ? 'table-danger' : day.status === 'maintenance' ? 'table-warning' : '' %>">
                   <td><%= day.formattedDate %></td>
                   <td><%= day.dayOfWeek %></td>
-                  <td><%= day.priceCategory %></td>
-                  <td><%= day.formattedPrice %></td>
+                  <td><%= day.categoryLabel %></td>
+                  <td class="fw-bold"><%= day.formattedPrice %></td>
                   <td>
-                    <span class="badge <%= day.status === 'available' ? 'bg-success' : day.status === 'occupied' ? 'bg-danger' : 'bg-warning' %>"><%= day.status %></span>
+                    <span class="badge <%= day.status === 'available' ? 'bg-success' : day.status === 'occupied' ? 'bg-danger' : 'bg-warning text-dark' %>">
+                      <%= day.statusLabel %>
+                    </span>
                   </td>
                   <td>
-                    <button class="btn btn-sm btn-outline-primary edit-price-btn"
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary edit-price-btn"
                       data-id="<%= day.id %>"
                       data-date="<%= day.formattedDate %>"
-                      data-price="<%= day.price %>">Editar</button>
+                      data-price="<%= day.price %>"
+                      data-category="<%= day.priceCategory %>"
+                    >
+                      Editar
+                    </button>
                   </td>
                 </tr>
                 <% }); %>
@@ -186,11 +140,12 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Editar Precio</h5>
-          <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h5 class="modal-title">Editar Precio del Día</h5>
+          <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <form id="editSinglePriceForm" action="/admin/precios/update-single" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <input type="hidden" name="dayId" id="editDayId">
             <div class="mb-3">
               <label class="form-label" for="editDate">Fecha</label>
@@ -201,7 +156,7 @@
               <label class="form-label" for="editPrice">Precio (CLP)</label>
               <div class="input-group">
                 <span class="input-group-text">$</span>
-                <input class="form-control" id="editPrice" type="number" name="price" min="0" step="1000" required>
+                <input class="form-control" id="editPrice" type="number" name="price" min="1000" step="1000" required>
               </div>
             </div>
 

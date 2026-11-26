@@ -86,8 +86,8 @@ body {
 /* Hero Section */
 .hero-section {
   height: 100vh;
-  background: linear-gradient(rgba(45, 80, 22, 0.3), rgba(30, 136, 229, 0.2)), 
-               url('../img/portada.jpg') center/cover;
+  background: linear-gradient(rgba(45, 80, 22, 0.3), rgba(30, 136, 229, 0.2)),
+               url('../img/portada.webp') center/cover;
   display: flex;
   align-items: center;
   position: relative;
@@ -752,4 +752,59 @@ html {
 
 .shadow-custom-lg {
   box-shadow: var(--shadow-lg);
+}
+
+/* Floating WhatsApp CTA */
+.whatsapp-float {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1040;
+  background: #25d366;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.whatsapp-float:hover {
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Native Gallery Lightbox Dialog */
+.gallery-lightbox {
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  background: #1a1a1a;
+  max-width: min(92vw, 960px);
+  margin: auto;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+}
+
+.gallery-lightbox::backdrop {
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(4px);
+}
+
+.gallery-lightbox img {
+  max-height: 75vh;
+  width: 100%;
+  object-fit: contain;
+}
+
+.success-icon {
+  font-size: 3.5rem;
+}
+
+.letter-spacing-1 {
+  letter-spacing: 0.08em;
 }

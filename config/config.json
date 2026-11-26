@@ -6,13 +6,21 @@
   },
   "test": {
     "dialect": "sqlite",
-    "storage": "./database.test.sqlite",
+    "storage": ":memory:",
     "logging": false
   },
   "production": {
-    "dialect": "sqlite",
-    "storage": "./database.sqlite",
+    "dialect": "mysql",
+    "use_env_variable": "DATABASE_URL",
     "logging": false,
-    "use_env_variable": "DATABASE_URL"
+    "dialectOptions": {
+      "charset": "utf8mb4"
+    },
+    "pool": {
+      "max": 10,
+      "min": 0,
+      "acquire": 30000,
+      "idle": 10000
+    }
   }
 }

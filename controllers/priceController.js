@@ -1,38 +1,43 @@
-const { Availability } = require('../models');
-const moment = require('moment');
-const { Op } = require('sequelize');
+const { validationResult } = require('express-validator');
+const pricingService = require('../services/pricingService');
+const { formatCLDate, formatCLP, dayNameEs, todayYMD } = require('../services/dateUtils');
+
+const CATEGORY_LABELS = {
+  normal: 'Normal',
+  weekend: 'Fin de Semana',
+  high_season: 'Temporada Alta',
+  holiday: 'Feriado',
+  special: 'Especial'
+};
+
+const STATUS_LABELS = {
+  available: 'Disponible',
+  occupied: 'Ocupado',
+  maintenance: 'Mantenimiento'
+};
 
 exports.showPricesPage = async (req, res) => {
   try {
-    // Obtener datos de disponibilidad para los próximos 3 meses
-    const startDate = moment().startOf('day').toDate();
-    const endDate = moment().add(3, 'months').endOf('day').toDate();
-    
-    const availabilityData = await Availability.findAll({
-      where: {
-        date: {
-          [Op.between]: [startDate, endDate]
-        }
-      },
-      order: [['date', 'ASC']]
-    });
-    
-    // Formatear datos para la vista
-    const formattedData = availabilityData.map(day => ({
+    const availabilityData = await pricingService.getUpcomingPrices(3);
+
+    const formattedData = availabilityData.map((day) => ({
       id: day.id,
       date: day.date,
-      formattedDate: moment(day.date).format('DD/MM/YYYY'),
-      dayOfWeek: moment(day.date).format('dddd'),
-      price: day.price,
-      formattedPrice: new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(day.price),
+      formattedDate: formatCLDate(day.date),
+      dayOfWeek: dayNameEs(day.date),
+      price: parseFloat(day.price),
+      formattedPrice: formatCLP(day.price),
       status: day.status,
-      priceCategory: day.priceCategory || 'normal'
+      statusLabel: STATUS_LABELS[day.status] || day.status,
+      priceCategory: day.priceCategory || 'normal',
+      categoryLabel: CATEGORY_LABELS[day.priceCategory] || day.priceCategory
     }));
-    
+
     res.render('admin/prices', {
       layout: 'admin/layout',
       title: 'Gestión de Precios',
       user: req.session.user,
+      todayDate: todayYMD(),
       availabilityData: formattedData
     });
   } catch (error) {
@@ -46,14 +51,13 @@ exports.showPricesPage = async (req, res) => {
 
 exports.updatePricesByCategory = async (req, res) => {
   try {
-    const { category, price } = req.body;
-    
-    if (!category || !price) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
       return res.redirect('/admin/precios?error=category-update-failed');
     }
-    
-    await Availability.updatePricesByCategory(category, price);
-    
+
+    const { category, price } = req.body;
+    await pricingService.updatePricesByCategory(category, price);
     res.redirect('/admin/precios?success=category-updated');
   } catch (error) {
     console.error('Error updating prices by category:', error);
@@ -63,17 +67,17 @@ exports.updatePricesByCategory = async (req, res) => {
 
 exports.updatePricesByRange = async (req, res) => {
   try {
-    const { startDate, endDate, price, category } = req.body;
-    
-    if (!startDate || !endDate || !price) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
       return res.redirect('/admin/precios?error=range-update-failed');
     }
-    
-    const start = moment(startDate).startOf('day').toDate();
-    const end = moment(endDate).endOf('day').toDate();
-    
-    await Availability.updatePricesByDateRange(start, end, price, category || null);
-    
+
+    const { startDate, endDate, price, category } = req.body;
+    if (endDate < startDate) {
+      return res.redirect('/admin/precios?error=invalid-range');
+    }
+
+    await pricingService.updatePricesByDateRange(startDate, endDate, price, category || null);
     res.redirect('/admin/precios?success=range-updated');
   } catch (error) {
     console.error('Error updating prices by range:', error);
@@ -83,20 +87,13 @@ exports.updatePricesByRange = async (req, res) => {
 
 exports.updateSinglePrice = async (req, res) => {
   try {
-    const { dayId, price, category } = req.body;
-    
-    if (!dayId || !price) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
       return res.redirect('/admin/precios?error=single-update-failed');
     }
-    
-    await Availability.update(
-      { 
-        price: parseFloat(price),
-        priceCategory: category 
-      },
-      { where: { id: dayId } }
-    );
-    
+
+    const { dayId, price, category } = req.body;
+    await pricingService.updateSinglePrice(parseInt(dayId, 10), price, category || null);
     res.redirect('/admin/precios?success=single-updated');
   } catch (error) {
     console.error('Error updating single price:', error);
@@ -106,52 +103,30 @@ exports.updateSinglePrice = async (req, res) => {
 
 exports.getCurrentPrice = async (req, res) => {
   try {
-    // Buscar el precio para hoy ignorando la hora
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const day = await Availability.findOne({ where: { date: today } });
-    let price = 50000; // Valor por defecto
-    if (day && day.price) price = parseFloat(day.price);
+    const price = await pricingService.getTodayPrice();
     res.json({ price });
-  } catch (err) {
+  } catch (error) {
+    console.error('Error getting current price:', error);
     res.status(500).json({ error: 'No se pudo obtener el precio' });
   }
 };
 
 exports.getPriceRange = async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: 'Fechas inválidas', details: errors.array() });
+    }
+
     const { checkIn, checkOut } = req.query;
-    if (!checkIn || !checkOut) {
-      return res.status(400).json({ error: 'Faltan fechas de entrada o salida' });
-    }
-    const start = moment(checkIn);
-    const end = moment(checkOut);
-    if (!start.isValid() || !end.isValid() || end.isSameOrBefore(start)) {
-      return res.status(400).json({ error: 'Fechas inválidas' });
+    if (checkOut <= checkIn) {
+      return res.status(400).json({ error: 'La fecha de salida debe ser posterior a la fecha de entrada' });
     }
 
-    let totalPrice = 0;
-    const prices = [];
-    let current = start.clone();
-    while (current.isBefore(end)) {
-      const day = await Availability.findOne({ where: { date: current.toDate() } });
-      const price = day && day.price ? parseFloat(day.price) : 50000;
-      prices.push({
-        date: current.format('YYYY-MM-DD'),
-        price
-      });
-      totalPrice += price;
-      current.add(1, 'day');
-    }
-
-    res.json({
-      totalPrice,
-      prices,
-      nights: prices.length,
-      averagePrice: totalPrice / prices.length
-    });
-  } catch (err) {
-    console.error('Error in getPriceRange:', err);
+    const pricing = await pricingService.calculateRangePrice(checkIn, checkOut);
+    res.json(pricing);
+  } catch (error) {
+    console.error('Error in getPriceRange:', error);
     res.status(500).json({ error: 'No se pudo obtener el precio del rango' });
   }
 };

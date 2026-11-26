@@ -1,115 +1,83 @@
-// Main JavaScript for Pino Huacho Cabin Website
-document.addEventListener('DOMContentLoaded', function() {
-  // Initialize tooltips and other Bootstrap components
+// Main JavaScript for Cabaña Pino Huacho
+document.addEventListener('DOMContentLoaded', () => {
   initializeBootstrapComponents();
-  
-  // Set up smooth scrolling
   setupSmoothScrolling();
-  
-  // Initialize lazy loading for images
-  setupLazyLoading();
-  
-  // Add navbar scroll effect
   setupNavbarScrollEffect();
-  
-  // Initialize form validations
   setupFormValidations();
+  setupBackButtons();
 });
 
 function initializeBootstrapComponents() {
-  // Initialize all tooltips
-  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-    return new bootstrap.Tooltip(tooltipTriggerEl);
+  if (typeof bootstrap === 'undefined') return;
+
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
+    new bootstrap.Tooltip(el);
   });
 
-  // Initialize all popovers
-  var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-  var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-    return new bootstrap.Popover(popoverTriggerEl);
+  document.querySelectorAll('[data-bs-toggle="popover"]').forEach((el) => {
+    new bootstrap.Popover(el);
   });
 }
 
 function setupSmoothScrolling() {
-  // Smooth scrolling for anchor links
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
+  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+    anchor.addEventListener('click', (e) => {
+      const href = anchor.getAttribute('href');
+      if (!href || href === '#') return;
+      const target = document.querySelector(href);
       if (target) {
-        target.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     });
   });
-}
-
-function setupLazyLoading() {
-  // Simple lazy loading implementation
-  const images = document.querySelectorAll('img[data-src]');
-  
-  const imageObserver = new IntersectionObserver((entries, observer) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const img = entry.target;
-        img.src = img.dataset.src;
-        img.classList.remove('lazy');
-        imageObserver.unobserve(img);
-      }
-    });
-  });
-
-  images.forEach(img => imageObserver.observe(img));
 }
 
 function setupNavbarScrollEffect() {
   const navbar = document.querySelector('.navbar');
   if (!navbar) return;
 
-  window.addEventListener('scroll', function() {
-    if (window.scrollY > 50) {
-      navbar.classList.add('navbar-scrolled');
-    } else {
-      navbar.classList.remove('navbar-scrolled');
-    }
+  window.addEventListener(
+    'scroll',
+    () => {
+      navbar.classList.toggle('navbar-scrolled', window.scrollY > 50);
+    },
+    { passive: true }
+  );
+}
+
+function setupBackButtons() {
+  document.querySelectorAll('[data-action="go-back"]').forEach((btn) => {
+    btn.addEventListener('click', () => window.history.back());
   });
 }
 
 function setupFormValidations() {
-  // Add custom validation styles and feedback
-  const forms = document.querySelectorAll('.needs-validation');
-  
-  Array.prototype.slice.call(forms).forEach(function(form) {
-    form.addEventListener('submit', function(event) {
+  document.querySelectorAll('.needs-validation').forEach((form) => {
+    form.addEventListener('submit', (event) => {
       if (!form.checkValidity()) {
         event.preventDefault();
         event.stopPropagation();
       }
       form.classList.add('was-validated');
-    }, false);
+    });
   });
 
-  // Real-time validation for email fields
-  const emailInputs = document.querySelectorAll('input[type="email"]');
-  emailInputs.forEach(input => {
+  document.querySelectorAll('input[type="email"]').forEach((input) => {
     input.addEventListener('blur', validateEmail);
     input.addEventListener('input', clearValidationState);
   });
 
-  // Real-time validation for phone fields
-  const phoneInputs = document.querySelectorAll('input[type="tel"]');
-  phoneInputs.forEach(input => {
+  document.querySelectorAll('input[type="tel"]').forEach((input) => {
     input.addEventListener('blur', validatePhone);
     input.addEventListener('input', clearValidationState);
   });
 }
 
 function validateEmail(event) {
-  const email = event.target.value;
+  const email = event.target.value.trim();
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
+
   if (email && !emailPattern.test(email)) {
     event.target.classList.add('is-invalid');
     showFieldError(event.target, 'Por favor ingrese un email válido');
@@ -121,12 +89,13 @@ function validateEmail(event) {
 }
 
 function validatePhone(event) {
-  const phone = event.target.value;
-  const phonePattern = /^(\+56|56)?[\s-]?[9]\d{8}$/;
-  
-  if (phone && !phonePattern.test(phone.replace(/[\s-]/g, ''))) {
+  const phone = event.target.value.trim();
+  // Acepta teléfonos chilenos e internacionales (ej. +56 9 1234 5678, +54 11..., 912345678)
+  const phonePattern = /^\+?[\d\s\-()]{8,20}$/;
+
+  if (phone && !phonePattern.test(phone)) {
     event.target.classList.add('is-invalid');
-    showFieldError(event.target, 'Por favor ingrese un teléfono válido (+56 9 XXXX XXXX)');
+    showFieldError(event.target, 'Ingresa un teléfono válido (8 a 20 caracteres, ej. +56 9 1234 5678)');
   } else if (phone) {
     event.target.classList.remove('is-invalid');
     event.target.classList.add('is-valid');
@@ -151,29 +120,31 @@ function showFieldError(field, message) {
 
 function hideFieldError(field) {
   const errorDiv = field.parentNode.querySelector('.invalid-feedback');
-  if (errorDiv) {
-    errorDiv.remove();
-  }
+  if (errorDiv) errorDiv.remove();
 }
 
-// Utility functions
 function showAlert(type, message, duration = 5000) {
   const alertContainer = document.getElementById('alert-container') || createAlertContainer();
-  
+
   const alertDiv = document.createElement('div');
   alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-  alertDiv.innerHTML = `
-    ${message}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  `;
-  
+  alertDiv.setAttribute('role', 'alert');
+
+  const textSpan = document.createElement('span');
+  textSpan.textContent = message;
+
+  const closeBtn = document.createElement('button');
+  closeBtn.type = 'button';
+  closeBtn.className = 'btn-close';
+  closeBtn.setAttribute('data-bs-dismiss', 'alert');
+  closeBtn.setAttribute('aria-label', 'Cerrar');
+
+  alertDiv.appendChild(textSpan);
+  alertDiv.appendChild(closeBtn);
   alertContainer.appendChild(alertDiv);
-  
-  // Auto remove after duration
+
   setTimeout(() => {
-    if (alertDiv.parentNode) {
-      alertDiv.remove();
-    }
+    if (alertDiv.parentNode) alertDiv.remove();
   }, duration);
 }
 
@@ -181,7 +152,7 @@ function createAlertContainer() {
   const container = document.createElement('div');
   container.id = 'alert-container';
   container.style.position = 'fixed';
-  container.style.top = '20px';
+  container.style.top = '80px';
   container.style.right = '20px';
   container.style.zIndex = '9999';
   container.style.maxWidth = '400px';
@@ -192,51 +163,26 @@ function createAlertContainer() {
 function formatCurrency(amount) {
   return new Intl.NumberFormat('es-CL', {
     style: 'currency',
-    currency: 'CLP'
-  }).format(amount);
+    currency: 'CLP',
+    maximumFractionDigits: 0
+  }).format(Number(amount) || 0);
 }
 
-function formatDate(date, options = {}) {
-  const defaultOptions = { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  };
-  return new Date(date).toLocaleDateString('es-CL', { ...defaultOptions, ...options });
+function formatYMDToCL(ymd) {
+  if (!ymd || typeof ymd !== 'string') return '';
+  const parts = ymd.split('-');
+  if (parts.length !== 3) return ymd;
+  return `${parts[2]}/${parts[1]}/${parts[0]}`;
 }
 
-// Loading states
-function showLoading(element) {
-  if (typeof element === 'string') {
-    element = document.querySelector(element);
-  }
-  if (element) {
-    element.classList.add('loading');
-    const loader = document.createElement('div');
-    loader.className = 'spinner-border spinner-border-sm me-2';
-    loader.setAttribute('role', 'status');
-    element.prepend(loader);
-  }
+function getCsrfToken() {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  return meta ? meta.getAttribute('content') : '';
 }
 
-function hideLoading(element) {
-  if (typeof element === 'string') {
-    element = document.querySelector(element);
-  }
-  if (element) {
-    element.classList.remove('loading');
-    const loader = element.querySelector('.spinner-border');
-    if (loader) {
-      loader.remove();
-    }
-  }
-}
-
-// Export functions for use in other scripts
 window.CabinUtils = {
   showAlert,
   formatCurrency,
-  formatDate,
-  showLoading,
-  hideLoading
+  formatYMDToCL,
+  getCsrfToken
 };

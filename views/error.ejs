@@ -6,16 +6,15 @@
       <div class="col-lg-6 text-center">
         <div class="error-container py-5">
           <div class="error-icon mb-4">
-            <i class="fas fa-exclamation-triangle fa-5x text-warning"></i>
+            <i class="fas fa-exclamation-triangle fa-5x text-warning" aria-hidden="true"></i>
           </div>
 
           <h1 class="display-4 fw-bold text-dark mb-3"><%= title %></h1>
-
           <p class="lead text-muted mb-4"><%= message %></p>
 
-          <div class="action-buttons">
-            <a class="btn btn-primary btn-lg me-3" href="/">Volver al Inicio</a>
-            <a class="btn btn-outline-primary btn-lg" href="javascript:history.back()">Ir Atrás</a>
+          <div class="action-buttons d-flex justify-content-center gap-3 flex-wrap">
+            <a class="btn btn-primary btn-lg" href="/">Volver al Inicio</a>
+            <button type="button" class="btn btn-outline-primary btn-lg" data-action="go-back">Ir Atrás</button>
           </div>
         </div>
       </div>

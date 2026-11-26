@@ -1,14 +1,14 @@
-const { sequelize } = require('../models');
+const { sequelize, configureSqlitePragmas } = require('../models');
 
 async function updateDatabase() {
   try {
     await sequelize.authenticate();
-    console.log('Database connection established successfully.');
-    
-    // Sync database with alter option to update existing tables
+    await configureSqlitePragmas();
+    console.log(`Database connection established (${sequelize.getDialect()}).`);
+
     await sequelize.sync({ alter: true });
     console.log('Database updated successfully.');
-    
+
     process.exit(0);
   } catch (error) {
     console.error('Error updating database:', error);
@@ -17,4 +17,3 @@ async function updateDatabase() {
 }
 
 updateDatabase();
-
