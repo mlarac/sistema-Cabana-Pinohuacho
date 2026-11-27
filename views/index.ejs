@@ -24,8 +24,8 @@
             🌲 <%= cabin.tagline %>
           </h1>
           <p class="lead mb-4">Escapa de la rutina y conecta con la naturaleza en nuestra acogedora cabaña ubicada en Pino Huacho. Un refugio perfecto para hasta <%= cabin.maxGuests %> personas rodeado de bosques nativos y lagos cristalinos.</p>
-          <div class="hero-buttons">
-            <a class="btn btn-warning btn-lg me-3" href="/reservar">
+          <div class="hero-buttons d-flex flex-wrap gap-3">
+            <a class="btn btn-warning btn-lg" href="/reservar">
               📅 Reservar Ahora
             </a>
             <a class="btn btn-outline-light btn-lg" href="/caracteristicas">
@@ -90,19 +90,19 @@
     <div class="row justify-content-center">
       <div class="col-lg-10">
         <div class="card shadow-lg border-0">
-          <div class="card-header text-white text-center py-4">
-            <div class="d-flex justify-content-between align-items-center">
-              <button type="button" class="btn btn-outline-light" id="prev-month-btn" aria-label="Mes anterior">← Anterior</button>
+          <div class="card-header text-white text-center py-3 py-md-4 px-2 px-md-4">
+            <div class="d-flex justify-content-between align-items-center gap-2">
+              <button type="button" class="btn btn-outline-light calendar-nav-btn" id="prev-month-btn" aria-label="Mes anterior">← <span class="d-none d-sm-inline">Anterior</span></button>
               <h4 class="mb-0" id="calendar-title">📅 Cargando...</h4>
-              <button type="button" class="btn btn-outline-light" id="next-month-btn" aria-label="Mes siguiente">Siguiente →</button>
+              <button type="button" class="btn btn-outline-light calendar-nav-btn" id="next-month-btn" aria-label="Mes siguiente"><span class="d-none d-sm-inline">Siguiente</span> →</button>
             </div>
           </div>
 
-          <div class="card-body p-4">
+          <div class="card-body p-2 p-sm-4">
             <!-- Calendar Legend -->
-            <div class="row mb-4">
+            <div class="row mb-3 mb-md-4">
               <div class="col-12">
-                <div class="d-flex justify-content-center flex-wrap gap-4">
+                <div class="d-flex justify-content-center flex-wrap gap-2 gap-sm-4">
                   <div class="legend-item d-flex align-items-center">
                     <div class="legend-color available me-2"></div>
                     <span>Disponible</span>

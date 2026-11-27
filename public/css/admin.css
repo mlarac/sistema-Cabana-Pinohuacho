@@ -17,7 +17,7 @@ body {
 
 /* Sidebar */
 .sidebar {
-  min-height: calc(100vh - 56px);
+  min-height: calc(100dvh - 56px);
   border-right: 1px solid #dee2e6;
 }
 
@@ -223,20 +223,45 @@ body {
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .sidebar {
     min-height: auto;
+    border-right: none;
+    border-bottom: 1px solid #dee2e6;
   }
-  
+
+  .sidebar .list-group {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .sidebar .list-group-item {
+    padding: 0.75rem 1rem;
+    flex: 0 0 auto;
+  }
+
+  .sidebar .list-group-item hr {
+    display: none;
+  }
+
   .calendar-container {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
   }
-  
+
+  .calendar-header {
+    padding: 0.45rem 0.15rem;
+    font-size: 0.72rem;
+  }
+
   .calendar-day {
-    min-height: 50px;
-    padding: 0.5rem;
+    min-height: 48px;
+    min-width: 0;
+    padding: 0.35rem 0.15rem;
+    overflow: hidden;
   }
-  
+
   .stat-icon {
     width: 50px;
     height: 50px;

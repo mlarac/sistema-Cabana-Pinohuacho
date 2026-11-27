@@ -1,6 +1,7 @@
 /* Pino Huacho Cabin - Main Styles */
 :root {
   --primary-color: #2d5016;
+  --primary-color-rgb: 45, 80, 22;
   --secondary-color: #4a7c59;
   --accent-color: #1e88e5;
   --wood-color: #8d6e63;
@@ -40,7 +41,7 @@ body {
 }
 
 .navbar-brand {
-  font-size: 1.6rem;
+  font-size: clamp(1.1rem, 0.9rem + 1.4vw, 1.6rem);
   font-weight: 700;
   color: var(--text-light) !important;
   display: flex;
@@ -49,8 +50,8 @@ body {
 
 .navbar-brand::before {
   content: "🏠";
-  margin-right: 0.5rem;
-  font-size: 1.4rem;
+  margin-right: 0.45rem;
+  font-size: 1.25em;
 }
 
 .nav-link {
@@ -85,7 +86,9 @@ body {
 
 /* Hero Section */
 .hero-section {
-  height: 100vh;
+  min-height: 100dvh;
+  padding-top: 6rem;
+  padding-bottom: 3rem;
   background-color: var(--primary-color);
   background-image: url('../img/portada.jpg');
   background-image: image-set(
@@ -144,14 +147,15 @@ body {
 }
 
 .hero-content h1 {
-  font-size: 3.5rem;
+  font-size: clamp(1.85rem, 1.15rem + 3.2vw, 3.4rem);
   font-weight: 700;
-  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  margin-bottom: 1.25rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .hero-content .lead {
-  font-size: 1.3rem;
+  font-size: clamp(1rem, 0.92rem + 0.5vw, 1.3rem);
   margin-bottom: 2rem;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
@@ -334,9 +338,11 @@ body {
 .calendar-day.today::after {
   content: '•';
   position: absolute;
-  bottom: 4px;
-  color: #2196f3;
-  font-size: 1.2rem;
+  top: 1px;
+  right: 5px;
+  color: #1976d2;
+  font-size: 0.95rem;
+  line-height: 1;
 }
 
 .date-number {
@@ -399,6 +405,7 @@ body {
 .gallery-img {
   width: 100%;
   height: 280px;
+  aspect-ratio: 3 / 2;
   object-fit: cover;
   transition: all 0.3s ease;
 }
@@ -417,6 +424,15 @@ body {
 
 .gallery-item:hover .gallery-overlay {
   transform: translateY(0);
+}
+
+/* En dispositivos táctiles sin hover, mostrar siempre los títulos de la galería */
+@media (hover: none) {
+  .gallery-overlay {
+    transform: translateY(0);
+    padding: 1rem 1.25rem;
+    background: linear-gradient(transparent, rgba(20, 40, 10, 0.85));
+  }
 }
 
 /* Forms */
@@ -519,6 +535,7 @@ body {
 /* Sections */
 section {
   padding: 4rem 0;
+  scroll-margin-top: 84px;
 }
 
 .bg-light {
@@ -674,52 +691,119 @@ footer {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
-  .hero-section {
-    height: 80vh;
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    padding-top: 0.75rem;
+  }
+
+  .nav-link.btn {
+    margin-left: 0 !important;
+    width: 100%;
     text-align: center;
   }
-  
-  .hero-content h1 {
-    font-size: 2.5rem;
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 85dvh;
+    height: auto;
+    padding-top: 5.5rem;
+    padding-bottom: 2.5rem;
+    text-align: center;
   }
-  
+
+  .hero-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
   .hero-buttons .btn {
-    display: block;
+    display: flex;
+    justify-content: center;
     width: 100%;
-    margin-bottom: 1rem;
+    margin: 0 !important;
   }
-  
+
   .gallery-img {
-    height: 220px;
+    height: auto;
+    aspect-ratio: 3 / 2;
   }
-  
+
   .feature-card {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
   }
-  
+
   section {
-    padding: 2rem 0;
+    padding: 2.25rem 0;
   }
-  
+
   .calendar-day {
-    min-height: 50px;
-    padding: 0.5rem 0.25rem;
-    font-size: 0.85rem;
-  }
-  
-  .calendar-header {
-    padding: 0.75rem 0.5rem;
+    min-height: 52px;
+    min-width: 0;
+    padding: 0.35rem 0.15rem;
     font-size: 0.8rem;
+    overflow: hidden;
   }
-  
+
+  .calendar-day:hover {
+    transform: none;
+  }
+
+  .calendar-day.selected {
+    transform: none;
+    border-width: 2px;
+    box-shadow: inset 0 0 0 1px #1565c0;
+  }
+
+  .calendar-header {
+    padding: 0.5rem 0.15rem;
+    font-size: 0.75rem;
+  }
+
   .date-number {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
   }
-  
+
   .legend-item {
     font-size: 0.8rem;
-    margin-bottom: 0.5rem;
+  }
+
+  .whatsapp-float {
+    right: 14px;
+    bottom: 14px;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    justify-content: center;
+    font-size: 1.4rem;
+  }
+
+  .whatsapp-float-label {
+    display: none;
+  }
+
+  footer {
+    padding-bottom: 5rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .card-body {
+    padding: 1.15rem;
+  }
+
+  .calendar-nav-btn {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.85rem;
+  }
+
+  #calendar-title {
+    font-size: 1.05rem;
+  }
+
+  .calendar-price {
+    font-size: 0.65rem;
   }
 }
 

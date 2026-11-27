@@ -73,3 +73,32 @@
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border: 1px solid #dee2e6;
 }
+
+@media (max-width: 576px) {
+  .step-number {
+    width: 34px;
+    height: 34px;
+    font-size: 0.9rem;
+  }
+
+  .step-line {
+    margin: 16px 0.35rem 0;
+  }
+
+  .step-label {
+    font-size: 0.78rem;
+  }
+
+  .booking-step {
+    min-height: auto;
+  }
+
+  .booking-actions {
+    flex-direction: column-reverse;
+  }
+
+  .booking-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

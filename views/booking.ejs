@@ -146,7 +146,7 @@
                     placeholder="Hora estimada de llegada, solicitudes especiales, etc."><%= (typeof formData !== 'undefined' && formData && formData.notes) ? formData.notes : '' %></textarea>
                 </div>
 
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-between gap-2 booking-actions">
                   <button class="btn btn-outline-primary" type="button" data-action="prev-step">← Volver</button>
                   <button class="btn btn-primary btn-lg" type="button" data-action="next-step">Continuar →</button>
                 </div>
@@ -156,46 +156,46 @@
               <div class="booking-step d-none" id="step-3">
                 <h4 class="mb-4">✅ Paso 3: Revisa y envía tu solicitud</h4>
 
-                <div class="pricing-info p-4 rounded mb-4">
+                <div class="pricing-info p-3 p-sm-4 rounded mb-4">
                   <h5 class="fw-bold mb-3">💰 Resumen de tu solicitud</h5>
 
                   <div class="reservation-summary">
-                    <div class="d-flex justify-content-between mb-2">
+                    <div class="d-flex justify-content-between gap-2 mb-2">
                       <span>👤 Huésped:</span>
-                      <strong id="summary-name">-</strong>
+                      <strong id="summary-name" class="text-end text-break">-</strong>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
+                    <div class="d-flex justify-content-between gap-2 mb-2">
                       <span>✉️ Email:</span>
-                      <strong id="summary-email">-</strong>
+                      <strong id="summary-email" class="text-end text-break">-</strong>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
+                    <div class="d-flex justify-content-between gap-2 mb-2">
                       <span>📞 Teléfono:</span>
-                      <strong id="summary-phone">-</strong>
+                      <strong id="summary-phone" class="text-end text-break">-</strong>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
+                    <div class="d-flex justify-content-between gap-2 mb-2">
                       <span>📅 Entrada:</span>
-                      <strong id="summary-checkin">-</strong>
+                      <strong id="summary-checkin" class="text-end">-</strong>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
+                    <div class="d-flex justify-content-between gap-2 mb-2">
                       <span>📅 Salida:</span>
-                      <strong id="summary-checkout">-</strong>
+                      <strong id="summary-checkout" class="text-end">-</strong>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
+                    <div class="d-flex justify-content-between gap-2 mb-2">
                       <span>👥 Huéspedes:</span>
-                      <strong id="summary-guests">-</strong>
+                      <strong id="summary-guests" class="text-end">-</strong>
                     </div>
                     <%
                       const pData = (typeof prefilledData !== 'undefined' && prefilledData)
                         ? prefilledData
                         : { nights: 0, pricePerNight: cabin.defaultPrice, totalPrice: 0 };
                     %>
-                    <div class="d-flex justify-content-between mb-2">
+                    <div class="d-flex justify-content-between gap-2 mb-2">
                       <span>🌙 Noches:</span>
-                      <strong id="summary-nights"><%= pData.nights || '-' %></strong>
+                      <strong id="summary-nights" class="text-end"><%= pData.nights || '-' %></strong>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
+                    <div class="d-flex justify-content-between gap-2 mb-2">
                       <span>Tarifa promedio por noche:</span>
-                      <strong id="summary-price-per-night">
+                      <strong id="summary-price-per-night" class="text-end">
                         <%= new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(pData.pricePerNight) %> CLP
                       </strong>
                     </div>
@@ -204,9 +204,9 @@
 
                     <hr>
 
-                    <div class="d-flex justify-content-between fs-5">
+                    <div class="d-flex justify-content-between gap-2 fs-5">
                       <strong>💰 Total Estimado:</strong>
-                      <strong id="summary-total">
+                      <strong id="summary-total" class="text-end">
                         <%= new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(pData.totalPrice) %> CLP
                       </strong>
                     </div>
@@ -217,7 +217,7 @@
                   ℹ️ Tu solicitud quedará registrada en estado <strong>Pendiente de Confirmación</strong> y bloquearemos temporalmente tus fechas mientras coordinamos el abono.
                 </div>
 
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-between gap-2 booking-actions">
                   <button class="btn btn-outline-primary" type="button" data-action="prev-step">← Volver</button>
                   <button class="btn btn-success btn-lg" type="submit" id="submitBookingBtn">✅ Enviar Solicitud de Reserva</button>
                 </div>
